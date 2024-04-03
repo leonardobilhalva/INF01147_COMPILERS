@@ -1,5 +1,6 @@
 %{
 #include "tokens.h"
+#include "hash.h"
 int running = 1;
 int lineNumber = 1;
 %}
@@ -23,12 +24,10 @@ read             {return KW_READ;}
 print            {return KW_PRINT;}
 return           {return KW_RETURN;}
 
-[0-9]+           {return LIT_INT;}
+[0-9]+		     {hashInsert(yytext, LIT_INT); return LIT_INT;}
 [a-zA-Z]+        {return LIT_CHAR;}
 
-
 [-,;:()[]{}=+*/%<>&|~]   {return yytext[0];}
-
 
 [ \n\t]          {return TOKEN_ERROR;}
 "//".* 
@@ -41,11 +40,8 @@ return           {return KW_RETURN;}
 
 %%
 
-
-int main()
-{
-    yylex();
-}
+#include "hash.c"
+#include "main.c"
 
 int yywrap ()
 {
