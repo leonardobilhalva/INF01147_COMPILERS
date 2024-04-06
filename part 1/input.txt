@@ -20,6 +20,8 @@ _ardo
 3ardo
 B4rd0
 c
+true
+false
 
 'b'
 

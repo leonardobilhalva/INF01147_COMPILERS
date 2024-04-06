@@ -76,12 +76,12 @@ int main(int argc, char **argv)
     case LIT_REAL:
       printf("Found LIT_REAL\n");
       break;
-    // case LIT_FALSE:
-    //   printf("Found LIT_FALSE\n");
-    //   break;
-    // case LIT_TRUE:
-    //   printf("Found LIT_TRUE\n");
-    //   break;
+    case LIT_FALSE:
+      printf("Found LIT_FALSE\n");
+      break;
+    case LIT_TRUE:
+      printf("Found LIT_TRUE\n");
+      break;
     case LIT_STRING:
       printf("Found LIT_STRING\n");
       break;

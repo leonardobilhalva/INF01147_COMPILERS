@@ -21,6 +21,9 @@ read             {return KW_READ;}
 print            {return KW_PRINT;}
 return           {return KW_RETURN;}
 
+true            {return LIT_FALSE;}
+false           {return LIT_TRUE;}
+
 [-,;:()\[\]{}=+*/%<>&|~]            {return yytext[0];}
 
 "<="                                {return OPERATOR_LE;}
