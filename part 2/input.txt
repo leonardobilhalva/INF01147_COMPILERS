@@ -1,0 +1,39 @@
+bool            
+char            
+int            
+float           
+if              
+else            
+while           
+read            
+print            
+return
+
+<=           
+>=             
+==          
+!=
+
+b4rdo e a t4v3rn4
+Bardo
+_ardo
+3ardo
+B4rd0
+c
+true
+false
+
+'b'
+
+230
+
+22.22
+2.
+.2
+
+"leonardo bilhalva"
+
+/* test for comment
+teeeeessssstinggggg
+*/
+// test for comment
