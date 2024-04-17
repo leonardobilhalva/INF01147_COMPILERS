@@ -1,9 +1,16 @@
 %{
 // Leonardo Barros Bilhalva - 315768
-#include "tokens.h"
+#include "y.tab.h"
 #include "hash.h"
 int running = 1;
 int lineNumber = 1;
+
+int getLineNumber(void){
+    return lineNumber;
+}
+int yyparse();
+int yyerror();
+int yylex();
 %}
 
 %x COMMENT
@@ -50,6 +57,7 @@ false           {return LIT_TRUE;}
 
 %%
 
+#include "y.tab.c"
 #include "hash.c"
 #include "main.c"
 
@@ -60,10 +68,6 @@ return 1;
 
 void initMe(void){
 	hashInit();
-}
-
-int getLineNumber(void){
-    return lineNumber;
 }
 
 int isRunning(void){
