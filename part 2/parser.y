@@ -26,10 +26,51 @@
 
 %token TOKEN_ERROR
 
+%left '.' '&'
+%left '<' '>' OPERATOR_EQ
+%left '+' '-'
+%left '*' '/'
+
 %%
 
-programa: TK_IDENTIFIER
-    | LIT_INT
+programa: decl
+    ;
+
+decl: dec tail
+    |
+    ;
+
+tail: ',' dec tail
+    |
+    ;
+
+dec: KW_INT TK_IDENTIFIER
+    | KW_INT TK_IDENTIFIER '(' ')' body
+    ;
+
+body: '{' lcmd '}'
+    ;
+
+lcmd: cmd lcmd
+    ;
+
+cmd : TK_IDENTIFIER '=' expr
+    | KW_IF expr cmd
+    | KW_IF expr cmd KW_ELSE cmd
+    |
+    ;
+
+expr: LIT_INTEGER
+    | TK_IDENTIFIER
+    | expr '+' expr
+    | expr '-' expr
+    | expr '*' expr
+    | expr '/' expr
+    | expr 'OPERATOR_LE' expr
+    | expr 'OPERATOR_GE' expr
+    | expr 'OPERATOR_EQ' expr
+    | expr 'OPERATOR_DIF' expr
+    | '('expr ')'
     ;
 
 %%
