@@ -1,3 +1,5 @@
+// Leonardo Barros Bilhalva - 315768
+
 %token KW_CHAR           
 %token KW_INT            
 %token KW_FLOAT          
@@ -26,51 +28,116 @@
 
 %token TOKEN_ERROR
 
-%left '.' '&'
-%left '<' '>' OPERATOR_EQ
+%left '&' '|' '~'
+%left '<' '>' '='
+%left OPERATOR_LE OPERATOR_GE OPERATOR_EQ OPERATOR_DIF
 %left '+' '-'
 %left '*' '/'
 
 %%
 
-programa: decl
+program: head
     ;
 
-decl: dec tail
+head: globalVar ';' tail
+    | function tail
     |
     ;
 
-tail: ',' dec tail
+tail: head
+    ;
+
+globalVar: type TK_IDENTIFIER ':' value
+	| type TK_IDENTIFIER '[' LIT_INT ']' globalVector
+    ;
+
+globalVector: ':' value loopVector
     |
     ;
 
-dec: KW_INT TK_IDENTIFIER
-    | KW_INT TK_IDENTIFIER '(' ')' body
-    ;
-
-body: '{' lcmd '}'
-    ;
-
-lcmd: cmd lcmd
-    ;
-
-cmd : TK_IDENTIFIER '=' expr
-    | KW_IF expr cmd
-    | KW_IF expr cmd KW_ELSE cmd
+loopVector: value loopVector
     |
     ;
 
-expr: LIT_INTEGER
+function: type TK_IDENTIFIER '(' param ')' block
+    ;
+
+param: type TK_IDENTIFIER ',' param
+    | type TK_IDENTIFIER
+    |
+    ;
+
+expr: '(' expr ')'
     | TK_IDENTIFIER
+    | TK_IDENTIFIER '[' expr ']'
+    | value
     | expr '+' expr
     | expr '-' expr
     | expr '*' expr
     | expr '/' expr
-    | expr 'OPERATOR_LE' expr
-    | expr 'OPERATOR_GE' expr
-    | expr 'OPERATOR_EQ' expr
-    | expr 'OPERATOR_DIF' expr
-    | '('expr ')'
+    | expr '>' expr
+    | expr '<' expr
+    | expr '&' expr
+    | expr '|' expr
+    | expr '~' expr
+    | expr OPERATOR_LE expr
+    | expr OPERATOR_GE expr
+    | expr OPERATOR_EQ expr
+    | expr OPERATOR_DIF expr
+    | TK_IDENTIFIER '(' functionCallArgs ')'
+    ;
+
+functionCallArgs: expr ',' functionCallArgs
+    | expr
+    |
+    ;
+
+lcmd: cmd lcmd
+    |
+    ;
+
+block: '{' lcmd '}'
+    ;
+
+cmd: block
+    | assign ';'
+    | flowControl
+    | read ';'
+    | print ';'
+    | return ';'
+    | ';'
+    ;
+
+assign: TK_IDENTIFIER '=' expr
+    | TK_IDENTIFIER '[' expr ']' '=' expr
+    ;
+
+flowControl: KW_IF '(' expr ')' cmd
+    | KW_IF '(' expr ')' cmd KW_ELSE cmd
+    | KW_WHILE '(' expr ')' cmd
+    ;
+
+read: KW_READ type TK_IDENTIFIER
+    ;
+
+print: KW_PRINT LIT_STRING
+    | KW_PRINT type expr
+    ;
+
+return: KW_RETURN expr
+    ;
+
+value: LIT_CHAR
+    | LIT_INT
+    | LIT_REAL
+    | LIT_TRUE
+    | LIT_FALSE
+    ;
+
+type: KW_CHAR
+    | KW_INT
+    | KW_FLOAT
+    | KW_BOOL
     ;
 
 %%
