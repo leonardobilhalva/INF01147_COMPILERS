@@ -59,14 +59,17 @@ loopVector: value loopVector
     |
     ;
 
-function: type TK_IDENTIFIER '(' param ')' block
+function: type TK_IDENTIFIER '(' params ')' block
     ;
 
-param: type TK_IDENTIFIER ',' param
-    | type TK_IDENTIFIER
+params: nonemptyParams
     |
     ;
 
+nonemptyParams: type TK_IDENTIFIER
+    | type TK_IDENTIFIER ',' nonemptyParams
+    ;
+    
 expr: '(' expr ')'
     | TK_IDENTIFIER
     | TK_IDENTIFIER '[' expr ']'
@@ -87,9 +90,12 @@ expr: '(' expr ')'
     | TK_IDENTIFIER '(' functionCallArgs ')'
     ;
 
-functionCallArgs: expr ',' functionCallArgs
-    | expr
+functionCallArgs: nonemptyFunctionCallArgs
     |
+    ;
+
+nonemptyFunctionCallArgs: expr ',' nonemptyFunctionCallArgs
+    | expr
     ;
 
 lcmd: cmd lcmd
