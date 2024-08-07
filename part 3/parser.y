@@ -1,9 +1,25 @@
-// Leonardo Barros Bilhalva - 315768
+%{
+	#include "hash.h"
+	#include "ast.h"
+	#include <stdlib.h>
 
-%token KW_CHAR           
-%token KW_INT            
-%token KW_FLOAT          
-%token KW_BOOL           
+	int yylex();
+	int yyerror(const char *s);
+	int getLineNumber();
+
+	AST* root;
+%}
+
+%union
+{
+	HASH_NODE *symbol;
+	AST *ast;
+}
+
+%token<symbol> KW_CHAR           
+%token<symbol> KW_INT            
+%token<symbol> KW_FLOAT          
+%token<symbol> KW_BOOL           
 
 %token KW_IF             
 %token KW_ELSE           
@@ -17,17 +33,42 @@
 %token OPERATOR_EQ       
 %token OPERATOR_DIF      
 
-%token TK_IDENTIFIER     
+%token<symbol> TK_IDENTIFIER     
 
-%token LIT_INT           
-%token LIT_CHAR  
-%token LIT_REAL          
-%token LIT_FALSE         
-%token LIT_TRUE          
-%token LIT_STRING        
+%token<symbol> LIT_INT           
+%token<symbol> LIT_CHAR  
+%token<symbol> LIT_REAL          
+%token<symbol> LIT_FALSE        
+%token<symbol> LIT_TRUE          
+%token<symbol> LIT_STRING        
 
 %token TOKEN_ERROR
 
+%type<ast> program
+%type<ast> head
+%type<ast> tail
+%type<ast> globalVar
+%type<ast> globalVector
+%type<ast> loopVector
+%type<ast> function
+%type<ast> params
+%type<ast> nonemptyParams
+%type<ast> expr
+%type<ast> value
+%type<ast> functionCallArgs
+%type<ast> nonemptyFunctionCallArgs
+%type<ast> lcmd
+%type<ast> block
+%type<ast> cmd
+%type<ast> assign
+%type<ast> flowControl
+%type<ast> read
+%type<ast> print
+%type<ast> return
+%type<ast> type
+
+%left TK_IDENTIFIER
+%left '(' ')' '[' ']' '{' '}'
 %left '&' '|' '~'
 %left '<' '>' '='
 %left OPERATOR_LE OPERATOR_GE OPERATOR_EQ OPERATOR_DIF
@@ -36,120 +77,125 @@
 
 %%
 
-program: head
+program: head { root = $1; astPrint($1, 0);}
     ;
 
-head: globalVar ';' tail
-    | function tail
-    |
+head: globalVar ';' tail { $$ = astCreate(AST_HEAD_GLOBAL_VAR, 0, $1, $3, 0, 0); }
+    | function tail { $$ = astCreate(AST_HEAD, 0, $1, $2, 0, 0); }
+    | { $$ = 0; }
     ;
 
-tail: head
+tail: head { $$ = astCreate(AST_HEAD_TAIL, 0, $1, 0, 0, 0); }
+    | { $$ = 0; }
     ;
 
-globalVar: type TK_IDENTIFIER ':' value
-	| type TK_IDENTIFIER '[' LIT_INT ']' globalVector
+globalVar: type TK_IDENTIFIER '=' value { $$ = astCreate(AST_VARDECL, 0, $1, $2, $4, 0); }
+         | type TK_IDENTIFIER '[' LIT_INT ']' globalVector { $$ = astCreate(AST_VECTORDECL, 0, $1, $2, $4, $6); }
+         ;
+
+globalVector: ':' value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR, 0, $2, $3, 0, 0); }
+    | { $$ = 0; }
     ;
 
-globalVector: ':' value loopVector
-    |
+loopVector: value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR_LOOP, 0, $1, $2, 0, 0); }
+    | { $$ = 0; }
     ;
 
-loopVector: value loopVector
-    |
+function: type TK_IDENTIFIER '(' params ')' block { $$ = astCreate(AST_FUNCDECL, 0, $1, $2, $4, $6); }
     ;
 
-function: type TK_IDENTIFIER '(' params ')' block
+params: nonemptyParams { $$ = $1; }
+    | { $$ = 0; }
     ;
 
-params: nonemptyParams
-    |
+nonemptyParams: type TK_IDENTIFIER { $$ = astCreate(AST_PARAM, 0, $1, $2, 0, 0); }
+    | type TK_IDENTIFIER ',' nonemptyParams { $$ = astCreate(AST_PARAM_LIST, 0, $1, $2, $4, 0); }
     ;
 
-nonemptyParams: type TK_IDENTIFIER
-    | type TK_IDENTIFIER ',' nonemptyParams
-    ;
-    
-expr: '(' expr ')'
-    | TK_IDENTIFIER
-    | TK_IDENTIFIER '[' expr ']'
-    | value
-    | expr '+' expr
-    | expr '-' expr
-    | expr '*' expr
-    | expr '/' expr
-    | expr '>' expr
-    | expr '<' expr
-    | expr '&' expr
-    | expr '|' expr
-    | expr '~' expr
-    | expr OPERATOR_LE expr
-    | expr OPERATOR_GE expr
-    | expr OPERATOR_EQ expr
-    | expr OPERATOR_DIF expr
-    | TK_IDENTIFIER '(' functionCallArgs ')'
+expr: '(' expr ')'               { $$ = astCreate(AST_PARENS, 0, $2, 0, 0, 0); }
+    | TK_IDENTIFIER              { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+    | TK_IDENTIFIER '[' expr ']' { $$ = astCreate(AST_VECTOR, $1, $3, 0, 0, 0); }
+    | value                      { $$ = astCreate(AST_VALUE, $1, 0, 0, 0, 0); }
+    | expr '+' expr              { $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
+    | expr '-' expr              { $$ = astCreate(AST_SUB, 0, $1, $3, 0, 0); }
+    | expr '*' expr              { $$ = astCreate(AST_MUL, 0, $1, $3, 0, 0); }
+    | expr '/' expr              { $$ = astCreate(AST_DIV, 0, $1, $3, 0, 0); }
+    | expr '>' expr              { $$ = astCreate(AST_GTR, 0, $1, $3, 0, 0); }
+    | expr '<' expr              { $$ = astCreate(AST_LS, 0, $1, $3, 0, 0); }
+    | expr '&' expr              { $$ = astCreate(AST_AND, 0, $1, $3, 0, 0); }
+    | expr '|' expr              { $$ = astCreate(AST_OR, 0, $1, $3, 0, 0); }
+    | '~' expr                   { $$ = astCreate(AST_NEG, 0, $2, 0, 0, 0); }
+    | expr OPERATOR_LE expr      { $$ = astCreate(AST_OPLE, 0, $1, $3, 0, 0); }
+    | expr OPERATOR_GE expr      { $$ = astCreate(AST_OPGE, 0, $1, $3, 0, 0); }
+    | expr OPERATOR_EQ expr      { $$ = astCreate(AST_OPEQ, 0, $1, $3, 0, 0); }
+    | expr OPERATOR_DIF expr     { $$ = astCreate(AST_OPDIF, 0, $1, $3, 0, 0); }
+    | TK_IDENTIFIER '(' functionCallArgs ')' { $$ = astCreate(AST_FUNCCALL, 0, $1, $3, 0, 0); }
     ;
 
-functionCallArgs: nonemptyFunctionCallArgs
-    |
+functionCallArgs: nonemptyFunctionCallArgs { $$ = $1; }
+    | { $$ = 0; }
     ;
 
-nonemptyFunctionCallArgs: expr ',' nonemptyFunctionCallArgs
-    | expr
+nonemptyFunctionCallArgs: expr ',' nonemptyFunctionCallArgs { $$ = astCreate(AST_ARG_LIST, 0, $1, $3, 0, 0); }
+    | expr { $$ = astCreate(AST_ARG, 0, $1, 0, 0, 0); }
     ;
 
-lcmd: cmd lcmd
-    |
+lcmd: cmd lcmd { $$ = astCreate(AST_BLOCK_LIST, 0, $1, $2, 0, 0); }
+    | { $$ = 0; }
     ;
 
-block: '{' lcmd '}'
+block: '{' lcmd '}' { $$ = astCreate(AST_BLOCK, 0, $2, 0, 0, 0); }
     ;
 
-cmd: block
-    | assign ';'
-    | flowControl
-    | read ';'
-    | print ';'
-    | return ';'
-    | ';'
+cmd: block { $$ = $1; }
+    | assign ';' { $$ = $1; }
+    | flowControl { $$ = $1; }
+    | read ';' { $$ = $1; }
+    | print ';' { $$ = $1; }
+    | return ';' { $$ = $1; }
+    | ';' { $$ = 0; }
     ;
 
-assign: TK_IDENTIFIER '=' expr
-    | TK_IDENTIFIER '[' expr ']' '=' expr
+assign: TK_IDENTIFIER '=' expr { $$ = astCreate(AST_ASSIGN, 0, $1, $3, 0, 0); }
+    | TK_IDENTIFIER '[' expr ']' '=' expr { $$ = astCreate(AST_ASSIGN_VECTOR, 0, $1, $3, $6, 0); }
     ;
 
-flowControl: KW_IF '(' expr ')' cmd
-    | KW_IF '(' expr ')' cmd KW_ELSE cmd
-    | KW_WHILE '(' expr ')' cmd
+flowControl: KW_IF '(' expr ')' cmd { $$ = astCreate(AST_IF, 0, $3, $5, 0, 0); }
+    | KW_IF '(' expr ')' cmd KW_ELSE cmd { $$ = astCreate(AST_IFELSE, 0, $3, $5, $7, 0); }
+    | KW_WHILE '(' expr ')' cmd { $$ = astCreate(AST_WHILE, 0, $3, $5, 0, 0); }
     ;
 
-read: KW_READ type TK_IDENTIFIER
+read: KW_READ type TK_IDENTIFIER { $$ = astCreate(AST_READ, 0, $2, $3, 0, 0); }
     ;
 
-print: KW_PRINT LIT_STRING
-    | KW_PRINT type expr
+print: KW_PRINT LIT_STRING { $$ = astCreate(AST_PRINT, 0, $2, 0, 0, 0); }
+    | KW_PRINT type expr { $$ = astCreate(AST_PRINT_EXPR, 0, $2, $3, 0, 0); }
     ;
 
-return: KW_RETURN expr
+return: KW_RETURN expr { $$ = astCreate(AST_RETURN, 0, $2, 0, 0, 0); }
     ;
 
-value: LIT_CHAR
-    | LIT_INT
-    | LIT_REAL
-    | LIT_TRUE
-    | LIT_FALSE
+value: LIT_CHAR { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+    | LIT_INT   { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+    | LIT_REAL  { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+    | LIT_TRUE  { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
+    | LIT_FALSE { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
     ;
 
-type: KW_CHAR
-    | KW_INT
-    | KW_FLOAT
-    | KW_BOOL
+type: KW_CHAR { $$ = astCreate(AST_KWCHAR, 0, 0, 0, 0, 0); }
+    | KW_INT { $$ = astCreate(AST_KWINT, 0, 0, 0, 0, 0); }
+    | KW_FLOAT { $$ = astCreate(AST_KWFLOAT, 0, 0, 0, 0, 0); }
+    | KW_BOOL { $$ = astCreate(AST_KWBOOL, 0, 0, 0, 0, 0); }
     ;
 
 %%
 
-int yyerror ()
+AST* getRoot(){
+	return root;
+}
+
+int yyerror(const char *s)
 {
-fprintf(stderr,"Syntax error at line %d\n", getLineNumber());
-exit (3);
+    fprintf(stderr, "Syntax error at line %d: %s\n", getLineNumber(), s);
+    exit(3);
 }
