@@ -1,7 +1,8 @@
 %{
 // Leonardo Barros Bilhalva - 315768
-#include "y.tab.h"
 #include "hash.h"
+#include "ast.h"
+#include "y.tab.h"
 int running = 1;
 int lineNumber = 1;
 
@@ -56,10 +57,6 @@ false           {return LIT_TRUE;}
 <COMMENT>. 
 
 %%
-
-#include "y.tab.c"
-#include "hash.c"
-#include "main.c"
 
 int yywrap (){
 running = 0;
