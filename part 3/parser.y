@@ -4,7 +4,7 @@
 	#include <stdlib.h>
 
 	int yylex();
-	int yyerror(const char *s);
+	int yyerror();
 	int getLineNumber();
 
 	AST* root;
@@ -66,6 +66,9 @@
 %type<ast> print
 %type<ast> return
 %type<ast> type
+%type<ast> int
+%type<ast> string
+%type<ast> identifier
 
 %left TK_IDENTIFIER
 %left '(' ')' '[' ']' '{' '}'
@@ -77,7 +80,7 @@
 
 %%
 
-program: head { root = $1; astPrint($1, 0);}
+program: head { root = $$; astPrint($1, 0);}
     ;
 
 head: globalVar ';' tail { $$ = astCreate(AST_HEAD_GLOBAL_VAR, 0, $1, $3, 0, 0); }
@@ -85,12 +88,12 @@ head: globalVar ';' tail { $$ = astCreate(AST_HEAD_GLOBAL_VAR, 0, $1, $3, 0, 0);
     | { $$ = 0; }
     ;
 
-tail: head { $$ = astCreate(AST_HEAD_TAIL, 0, $1, 0, 0, 0); }
+tail: head { $$ = $1; }
     | { $$ = 0; }
     ;
 
-globalVar: type TK_IDENTIFIER '=' value { $$ = astCreate(AST_VARDECL, 0, $1, $2, $4, 0); }
-         | type TK_IDENTIFIER '[' LIT_INT ']' globalVector { $$ = astCreate(AST_VECTORDECL, 0, $1, $2, $4, $6); }
+globalVar: type identifier ':' value { $$ = astCreate(AST_VARDECL, 0, $1, $2, $4, 0); }
+         | type identifier '[' int ']' globalVector { $$ = astCreate(AST_VECTORDECL, 0, $1, $2, $4, $6); }
          ;
 
 globalVector: ':' value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR, 0, $2, $3, 0, 0); }
@@ -101,21 +104,21 @@ loopVector: value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR_LOOP, 0, $1, $2,
     | { $$ = 0; }
     ;
 
-function: type TK_IDENTIFIER '(' params ')' block { $$ = astCreate(AST_FUNCDECL, 0, $1, $2, $4, $6); }
+function: type identifier '(' params ')' block { $$ = astCreate(AST_FUNCDECL, 0, $1, $2, $4, $6); }
     ;
 
 params: nonemptyParams { $$ = $1; }
     | { $$ = 0; }
     ;
 
-nonemptyParams: type TK_IDENTIFIER { $$ = astCreate(AST_PARAM, 0, $1, $2, 0, 0); }
-    | type TK_IDENTIFIER ',' nonemptyParams { $$ = astCreate(AST_PARAM_LIST, 0, $1, $2, $4, 0); }
+nonemptyParams: type identifier { $$ = astCreate(AST_PARAM, 0, $1, $2, 0, 0); }
+    | type identifier ',' nonemptyParams { $$ = astCreate(AST_PARAM_LIST, 0, $1, $2, $4, 0); }
     ;
 
 expr: '(' expr ')'               { $$ = astCreate(AST_PARENS, 0, $2, 0, 0, 0); }
     | TK_IDENTIFIER              { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0); }
-    | TK_IDENTIFIER '[' expr ']' { $$ = astCreate(AST_VECTOR, $1, $3, 0, 0, 0); }
-    | value                      { $$ = astCreate(AST_VALUE, $1, 0, 0, 0, 0); }
+    | identifier '[' expr ']'    { $$ = astCreate(AST_VECTOR, 0, $1, $3, 0, 0); }
+    | value                      { $$ = $1; }
     | expr '+' expr              { $$ = astCreate(AST_ADD, 0, $1, $3, 0, 0); }
     | expr '-' expr              { $$ = astCreate(AST_SUB, 0, $1, $3, 0, 0); }
     | expr '*' expr              { $$ = astCreate(AST_MUL, 0, $1, $3, 0, 0); }
@@ -129,7 +132,7 @@ expr: '(' expr ')'               { $$ = astCreate(AST_PARENS, 0, $2, 0, 0, 0); }
     | expr OPERATOR_GE expr      { $$ = astCreate(AST_OPGE, 0, $1, $3, 0, 0); }
     | expr OPERATOR_EQ expr      { $$ = astCreate(AST_OPEQ, 0, $1, $3, 0, 0); }
     | expr OPERATOR_DIF expr     { $$ = astCreate(AST_OPDIF, 0, $1, $3, 0, 0); }
-    | TK_IDENTIFIER '(' functionCallArgs ')' { $$ = astCreate(AST_FUNCCALL, 0, $1, $3, 0, 0); }
+    | identifier '(' functionCallArgs ')' { $$ = astCreate(AST_FUNCCALL, 0, $1, $3, 0, 0); }
     ;
 
 functionCallArgs: nonemptyFunctionCallArgs { $$ = $1; }
@@ -156,8 +159,8 @@ cmd: block { $$ = $1; }
     | ';' { $$ = 0; }
     ;
 
-assign: TK_IDENTIFIER '=' expr { $$ = astCreate(AST_ASSIGN, 0, $1, $3, 0, 0); }
-    | TK_IDENTIFIER '[' expr ']' '=' expr { $$ = astCreate(AST_ASSIGN_VECTOR, 0, $1, $3, $6, 0); }
+assign: identifier '=' expr { $$ = astCreate(AST_ASSIGN, 0, $1, $3, 0, 0); }
+    | identifier '[' expr ']' '=' expr { $$ = astCreate(AST_ASSIGN_VECTOR, 0, $1, $3, $6, 0); }
     ;
 
 flowControl: KW_IF '(' expr ')' cmd { $$ = astCreate(AST_IF, 0, $3, $5, 0, 0); }
@@ -165,10 +168,10 @@ flowControl: KW_IF '(' expr ')' cmd { $$ = astCreate(AST_IF, 0, $3, $5, 0, 0); }
     | KW_WHILE '(' expr ')' cmd { $$ = astCreate(AST_WHILE, 0, $3, $5, 0, 0); }
     ;
 
-read: KW_READ type TK_IDENTIFIER { $$ = astCreate(AST_READ, 0, $2, $3, 0, 0); }
+read: KW_READ type identifier { $$ = astCreate(AST_READ, 0, $2, $3, 0, 0); }
     ;
 
-print: KW_PRINT LIT_STRING { $$ = astCreate(AST_PRINT, 0, $2, 0, 0, 0); }
+print: KW_PRINT string { $$ = astCreate(AST_PRINT, 0, $2, 0, 0, 0); }
     | KW_PRINT type expr { $$ = astCreate(AST_PRINT_EXPR, 0, $2, $3, 0, 0); }
     ;
 
@@ -187,6 +190,15 @@ type: KW_CHAR { $$ = astCreate(AST_KWCHAR, 0, 0, 0, 0, 0); }
     | KW_FLOAT { $$ = astCreate(AST_KWFLOAT, 0, 0, 0, 0, 0); }
     | KW_BOOL { $$ = astCreate(AST_KWBOOL, 0, 0, 0, 0, 0); }
     ;
+
+int: 	LIT_INT							{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0);}
+	;
+
+string: 	LIT_STRING							{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0);}
+	;
+
+identifier: 	TK_IDENTIFIER							{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0);}
+	;
 
 %%
 
