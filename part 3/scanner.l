@@ -6,12 +6,9 @@
 int running = 1;
 int lineNumber = 1;
 
-int getLineNumber(void){
+int getLineNumber(){
     return lineNumber;
 }
-int yyparse();
-int yyerror();
-int yylex();
 %}
 
 %x COMMENT
@@ -29,8 +26,8 @@ read             {return KW_READ;}
 print            {return KW_PRINT;}
 return           {return KW_RETURN;}
 
-true            {return LIT_FALSE;}
-false           {return LIT_TRUE;}
+true             { yylval.symbol = hashInsert(yytext, LIT_TRUE); return LIT_TRUE; }
+false            { yylval.symbol = hashInsert(yytext, LIT_FALSE); return LIT_FALSE; }
 
 [-,;:()\[\]{}=+*/%<>&|~]            {return yytext[0];}
 
@@ -39,12 +36,12 @@ false           {return LIT_TRUE;}
 "=="                                {return OPERATOR_EQ;}
 "!="                                {return OPERATOR_DIF;}
 
-[a-zA-Z_][a-zA-Z_0-9]*		        {hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER;}
+[a-zA-Z_][a-zA-Z_0-9]*		        { yylval.symbol = hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER;}
 
-[0-9]+						        {hashInsert(yytext, LIT_INT); return LIT_INT;}
-'.'							        {char* str = strndup(yytext + 1, yyleng - 2); hashInsert(str, LIT_CHAR); free(str); return LIT_CHAR;}
-[0-9]*\.[0-9]+|[0-9]+\.[0-9]*       {hashInsert(yytext, LIT_REAL); return LIT_REAL;}
-\"(\\.|[^"])*\"                     {char* str = strndup(yytext + 1, yyleng - 2); hashInsert(str, LIT_STRING); free(str); return LIT_STRING;}
+[0-9]+						        { yylval.symbol = hashInsert(yytext, LIT_INT); return LIT_INT;}
+'.'							        { yylval.symbol = hashInsert(yytext, LIT_CHAR); return LIT_CHAR;}
+[0-9]*\.[0-9]+|[0-9]+\.[0-9]*       { yylval.symbol = hashInsert(yytext, LIT_REAL); return LIT_REAL;}
+\"(\\.|[^"])*\"                     { yylval.symbol = hashInsert(yytext, LIT_STRING); return LIT_STRING;}
 
 [ \t]            
 "\n"             {lineNumber++;}
