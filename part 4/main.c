@@ -10,6 +10,8 @@ extern AST *getRoot();
 int yyparse();
 int getLineNumber();
 
+extern int checkSemantic();
+
 int main(int argc, char **argv)
 {
     FILE *output;
@@ -47,9 +49,13 @@ int main(int argc, char **argv)
         exit(3);
     }
 
-    fprintf(stderr, "Printing AST code to output file...\n");
-    astPrintCode(root, output);
-    fprintf(stderr, "AST code printed.\n");
+    fprintf(stderr, "Checking Semantic...\n");
+    checkSemantic();
+    fprintf(stderr, "No Semantic Errors.\n");
+
+    // fprintf(stderr, "Printing AST code to output file...\n");
+    // astPrintCode(root, output);
+    // fprintf(stderr, "AST code printed.\n");
 
     fclose(output);
 
