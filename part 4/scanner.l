@@ -26,8 +26,8 @@ read             {return KW_READ;}
 print            {return KW_PRINT;}
 return           {return KW_RETURN;}
 
-true             { yylval.symbol = hashInsert(yytext, LIT_TRUE); return LIT_TRUE; }
-false            { yylval.symbol = hashInsert(yytext, LIT_FALSE); return LIT_FALSE; }
+true             { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_TRUE, 0); return LIT_TRUE; }
+false            { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_FALSE, 0); return LIT_FALSE; }
 
 [-,;:()\[\]{}=+*/%<>&|~]            {return yytext[0];}
 
@@ -36,12 +36,12 @@ false            { yylval.symbol = hashInsert(yytext, LIT_FALSE); return LIT_FAL
 "=="                                {return OPERATOR_EQ;}
 "!="                                {return OPERATOR_DIF;}
 
-[a-zA-Z_][a-zA-Z_0-9]*		        { yylval.symbol = hashInsert(yytext, TK_IDENTIFIER); return TK_IDENTIFIER;}
+[a-zA-Z_][a-zA-Z_0-9]*		        { yylval.symbol = hashInsert(yytext, SYMBOL_IDENTIFIER, 0); return TK_IDENTIFIER;}
 
-[0-9]+						        { yylval.symbol = hashInsert(yytext, LIT_INT); return LIT_INT;}
-'.'							        { yylval.symbol = hashInsert(yytext, LIT_CHAR); return LIT_CHAR;}
-[0-9]*\.[0-9]+|[0-9]+\.[0-9]*       { yylval.symbol = hashInsert(yytext, LIT_REAL); return LIT_REAL;}
-\"(\\.|[^"])*\"                     { yylval.symbol = hashInsert(yytext, LIT_STRING); return LIT_STRING;}
+[0-9]+						        { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_INT, 0); return LIT_INT;}
+'.'							        { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_CHAR, 0); return LIT_CHAR;}
+[0-9]*\.[0-9]+|[0-9]+\.[0-9]*       { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_FLOAT, 0); return LIT_REAL;}
+\"(\\.|[^"])*\"                     { yylval.symbol = hashInsert(yytext, SYMBOL_LIT_STRING, 0); return LIT_STRING;}
 
 [ \t]            
 "\n"             {lineNumber++;}
