@@ -63,6 +63,6 @@ typedef struct astnode
 AST *astCreate(int type, HASH_NODE *symbol, AST *s0, AST *s1, AST *s2, AST *s3, int line);
 void astPrint(AST *node, int level);
 void astPrintCode(AST *node, FILE *output);
-const char* astTypeToString(int type);
+const char *astTypeToString(int type);
 
 #endif
