@@ -47,11 +47,11 @@ void setIdentifierTypes(AST *node)
     if (node == NULL)
         return;
 
-     switch (node->type)
+    switch (node->type)
     {
-    
+
     case AST_VARDECL:
-     if (node->son[1]->symbol->type != SYMBOL_IDENTIFIER)
+        if (node->son[1]->symbol->type != SYMBOL_IDENTIFIER)
         {
             fprintf(stderr, "SEMANTIC ERROR - Line %d: Variable %s redeclaration.\n", node->line, node->son[1]->symbol->text);
             semanticErrors++;
@@ -97,7 +97,7 @@ void setIdentifierTypes(AST *node)
             semanticErrors++;
         }
         break;
-    
+
     case AST_FUNCDECL:
         if (node->son[1]->symbol->type != SYMBOL_IDENTIFIER)
         {
@@ -131,7 +131,7 @@ void setIdentifierTypes(AST *node)
             else if (node->son[0]->type == AST_KWFLOAT)
                 node->son[1]->symbol->dataType = DATATYPE_FLOAT;
         }
-    break;
+        break;
     case AST_PARAM_LIST:
         if (node->son[1]->symbol->type != SYMBOL_IDENTIFIER)
         {
@@ -148,7 +148,7 @@ void setIdentifierTypes(AST *node)
             else if (node->son[0]->type == AST_KWFLOAT)
                 node->son[1]->symbol->dataType = DATATYPE_FLOAT;
         }
-    break;
+        break;
     default:
         break;
     }
@@ -158,7 +158,7 @@ void setIdentifierTypes(AST *node)
     }
 }
 
-void setNodeTypes (AST *node)
+void setNodeTypes(AST *node)
 {
     if (node == NULL)
         return;
@@ -236,8 +236,9 @@ void checkUsage(AST *node)
             semanticErrors++;
         }
         break;
-    case AST_ASSIGN_VECTOR: 
-        if(node->son[0]->symbol->type != SYMBOL_VECTOR){
+    case AST_ASSIGN_VECTOR:
+        if (node->son[0]->symbol->type != SYMBOL_VECTOR)
+        {
             fprintf(stderr, "Semantic ERROR - %d: Indexing only allowed for vectors.\n", node->line);
             semanticErrors++;
         }
@@ -276,8 +277,9 @@ void checkUsage(AST *node)
             semanticErrors++;
         }
         break;
-    case AST_READ: 
-        if(node->son[1]->symbol->type != SYMBOL_VAR){
+    case AST_READ:
+        if (node->son[1]->symbol->type != SYMBOL_VAR)
+        {
             fprintf(stderr, "Semantic ERROR - %d: Read only allowed to scalar variables.\n", node->line);
             semanticErrors++;
         }
@@ -288,33 +290,40 @@ void checkUsage(AST *node)
         }
         break;
     case AST_PRINT_EXPR:
-    if(node->son[1]->type == AST_SYMBOL) {
-        if(node->son[1]->symbol->type == SYMBOL_FUNC) {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a function.\n", node->line);
-            semanticErrors++;
+        if (node->son[1]->type == AST_SYMBOL)
+        {
+            if (node->son[1]->symbol->type == SYMBOL_FUNC)
+            {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a function.\n", node->line);
+                semanticErrors++;
+            }
+            else if (node->son[1]->symbol->type == SYMBOL_VECTOR)
+            {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
+                semanticErrors++;
+            }
+            if (!isDataTypeCompatible(node->son[1]->symbol->dataType, node->son[0]->dataType))
+            {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Incompatible types in print expression.\n", node->line);
+                semanticErrors++;
+            }
         }
-        else if(node->son[1]->symbol->type == SYMBOL_VECTOR) {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
-            semanticErrors++;
-        }
-        if (!isDataTypeCompatible(node->son[1]->symbol->dataType, node->son[0]->dataType)) {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Incompatible types in print expression.\n", node->line);
-            semanticErrors++;
-        }
-    }
-    break;
+        break;
     case AST_PRINT:
-    if(node->son[0]->type == AST_SYMBOL) {
-        if(node->son[0]->symbol->type == SYMBOL_FUNC) {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a function.\n", node->line);
-            semanticErrors++;
+        if (node->son[0]->type == AST_SYMBOL)
+        {
+            if (node->son[0]->symbol->type == SYMBOL_FUNC)
+            {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a function.\n", node->line);
+                semanticErrors++;
+            }
+            else if (node->son[0]->symbol->type == SYMBOL_VECTOR)
+            {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
+                semanticErrors++;
+            }
         }
-        else if(node->son[0]->symbol->type == SYMBOL_VECTOR) {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
-            semanticErrors++;
-        }
-    }
-    break;
+        break;
     default:
         break;
     }
@@ -372,43 +381,58 @@ int isLogicalOp(int nodetype)
     return (nodetype == AST_AND || nodetype == AST_OR || nodetype == AST_NEG);
 }
 
-void isReturnCompatible(AST *node, int expectedType){
-    if (node == NULL) return;
+void isReturnCompatible(AST *node, int expectedType)
+{
+    if (node == NULL)
+        return;
 
-    if (node->type == AST_RETURN){
-        if (node->son[0] == NULL) {
+    if (node->type == AST_RETURN)
+    {
+        if (node->son[0] == NULL)
+        {
             fprintf(stderr, "Semantic ERROR - Line %d: Return statement with no expression.\n", node->line);
             semanticErrors++;
             return;
         }
 
-        if (!isDataTypeCompatible(expectedType, node->son[0]->dataType)){
+        if (!isDataTypeCompatible(expectedType, node->son[0]->dataType))
+        {
             fprintf(stderr, "Semantic ERROR - Line %d: Return statement with incompatible datatype.\n", node->line);
             semanticErrors++;
         }
     }
 
-    for (int i = 0; i < MAX_SONS; i++){
-        if (node->son[i] != NULL) {
+    for (int i = 0; i < MAX_SONS; i++)
+    {
+        if (node->son[i] != NULL)
+        {
             isReturnCompatible(node->son[i], expectedType);
         }
     }
 }
 
-void checkReturns(AST *node) {
-    if (node == NULL) return;
+void checkReturns(AST *node)
+{
+    if (node == NULL)
+        return;
 
-    if (node->type == AST_FUNCDECL) {
-        if (node->son[1] != NULL && node->son[1]->symbol != NULL) {
+    if (node->type == AST_FUNCDECL)
+    {
+        if (node->son[1] != NULL && node->son[1]->symbol != NULL)
+        {
             isReturnCompatible(node->son[3], node->son[1]->symbol->dataType);
-        } else {
+        }
+        else
+        {
             fprintf(stderr, "Semantic ERROR - Line %d: No valid symbol for function.\n", node->line);
             semanticErrors++;
         }
     }
 
-    for (int i = 0; i < MAX_SONS; i++) {
-        if (node->son[i] != NULL) {
+    for (int i = 0; i < MAX_SONS; i++)
+    {
+        if (node->son[i] != NULL)
+        {
             checkReturns(node->son[i]);
         }
     }

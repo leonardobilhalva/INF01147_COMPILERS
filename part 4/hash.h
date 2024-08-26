@@ -34,7 +34,7 @@ typedef struct hash_node
     struct hash_node *next;
 } HASH_NODE;
 
-extern HASH_NODE *Table[HASH_SIZE]; 
+extern HASH_NODE *Table[HASH_SIZE];
 
 void hashInit(void);
 int hashAddress(char *text);
