@@ -33,7 +33,7 @@ HASH_NODE *hashFind(char *text)
     return 0;
 }
 
-HASH_NODE *hashInsert(char *text, int type)
+HASH_NODE *hashInsert(char *text, int type, int datatype)
 {
     HASH_NODE *newnode;
     int address = hashAddress(text);
@@ -43,6 +43,28 @@ HASH_NODE *hashInsert(char *text, int type)
 
     newnode = (HASH_NODE *)calloc(1, sizeof(HASH_NODE));
     newnode->type = type;
+
+    switch (newnode->type)
+    {
+    case SYMBOL_LIT_CHAR:
+        newnode->dataType = DATATYPE_CHAR;
+        break;
+    case SYMBOL_LIT_INT:
+        newnode->dataType = DATATYPE_INT;
+        break;
+    case SYMBOL_LIT_FLOAT:
+        newnode->dataType = DATATYPE_FLOAT;
+        break;
+    case SYMBOL_LIT_TRUE:
+        newnode->dataType = DATATYPE_BOOL;
+        break;
+    case SYMBOL_LIT_FALSE:
+        newnode->dataType = DATATYPE_BOOL;
+        break;
+    default:
+        break;
+    }
+
     newnode->text = (char *)calloc(strlen(text) + 1, sizeof(char));
     strcpy(newnode->text, text);
     newnode->next = Table[address];
