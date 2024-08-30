@@ -107,7 +107,7 @@ loopVector: value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR_LOOP, 0, $1, $2,
     | { $$ = 0; }
     ;
 
-function: type identifier '(' params ')' block { $$ = astCreate(AST_FUNCDECL, 0, $1, $2, $4, $6, getLineNumber()); }
+function: type identifier '(' params ')' block { $$ = astCreate(AST_FUNCDECL, $2->symbol, $1, $2, $4, $6, getLineNumber()); }
     ;
 
 params: nonemptyParams { $$ = $1; }
