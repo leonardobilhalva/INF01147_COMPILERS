@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include "hash.h"
 #include "ast.h"
+#include "tac.h"
 
 extern FILE *yyin;
 extern AST *getRoot();
+extern tac *getTACs();
 int yyparse();
 int getLineNumber();
 
@@ -53,9 +55,15 @@ int main(int argc, char **argv)
     checkSemantic();
     fprintf(stderr, "No Semantic Errors.\n");
 
-    // fprintf(stderr, "Printing AST code to output file...\n");
-    // astPrintCode(root, output);
-    // fprintf(stderr, "AST code printed.\n");
+    hashPrint();
+
+    fprintf(stderr, "TACs:\n\n");
+    printAllTacs(getTACs());
+
+
+    fprintf(stderr, "Printing AST code to output file...\n");
+    astPrintCode(root, output);
+    fprintf(stderr, "AST code printed.\n");
 
     fclose(output);
 
