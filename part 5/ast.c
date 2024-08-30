@@ -13,6 +13,16 @@ AST *astCreate(int type, HASH_NODE *symbol, AST *s0, AST *s1, AST *s2, AST *s3, 
     newnode->son[2] = s2;
     newnode->son[3] = s3;
     newnode->line = line;
+
+    //   fprintf(stderr, "Debug: Created AST node of type %d at line %d with symbol %s\n", type, line, symbol ? symbol->text : "NULL");
+    // for (int i = 0; i < MAX_SONS; ++i)
+    // {
+    //     if (newnode->son[i])
+    //     {
+    //         fprintf(stderr, "Debug: Son[%d] is of type %d with symbol %s\n", i, newnode->son[i]->type, newnode->son[i]->symbol ? newnode->son[i]->symbol->text : "NULL");
+    //     }
+    // }
+
     return newnode;
 }
 
