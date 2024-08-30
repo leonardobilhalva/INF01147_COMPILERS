@@ -188,10 +188,10 @@ value: LIT_CHAR { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0, getLineNumber()); }
     | LIT_FALSE { $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0, getLineNumber()); }
     ;
 
-type: KW_CHAR { $$ = astCreate(AST_KWCHAR, 0, 0, 0, 0, 0, getLineNumber()); }
-    | KW_INT { $$ = astCreate(AST_KWINT, 0, 0, 0, 0, 0, getLineNumber()); }
-    | KW_FLOAT { $$ = astCreate(AST_KWFLOAT, 0, 0, 0, 0, 0, getLineNumber()); }
-    | KW_BOOL { $$ = astCreate(AST_KWBOOL, 0, 0, 0, 0, 0, getLineNumber()); }
+type: KW_CHAR { $$ = astCreate(AST_KWCHAR, $1, 0, 0, 0, 0, getLineNumber()); }
+    | KW_INT { $$ = astCreate(AST_KWINT, $1, 0, 0, 0, 0, getLineNumber()); }
+    | KW_FLOAT { $$ = astCreate(AST_KWFLOAT, $1, 0, 0, 0, 0, getLineNumber()); }
+    | KW_BOOL { $$ = astCreate(AST_KWBOOL, $1, 0, 0, 0, 0, getLineNumber()); }
     ;
 
 int: 	LIT_INT							{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0, getLineNumber()); }

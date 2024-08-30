@@ -23,6 +23,17 @@ int verifySemantic(AST *root)
     return semanticErrors;
 }
 
+const char* getTypeName(int dataType) {
+    switch (dataType) {
+        case DATATYPE_INT: return "int";
+        case DATATYPE_CHAR: return "char";
+        case DATATYPE_FLOAT: return "float";
+        case DATATYPE_BOOL: return "bool";
+        default: return "unknown";
+    }
+}
+
+
 void checkUndeclared()
 {
     HASH_NODE *node;
@@ -179,6 +190,32 @@ void setNodeTypes(AST *node)
     {
         node->dataType = node->son[0]->dataType;
     }
+   else if (node->type == AST_PRINT_EXPR)
+    {
+        if (node->son[0]->type == AST_KWCHAR)
+            node->dataType = DATATYPE_CHAR;
+        else if (node->son[0]->type == AST_KWINT)
+            node->dataType = DATATYPE_INT;
+        else if (node->son[0]->type == AST_KWFLOAT)
+            node->dataType = DATATYPE_FLOAT;
+        else if (node->son[0]->type == AST_KWBOOL)
+            node->dataType = DATATYPE_BOOL;
+        else
+            node->dataType = node->son[0]->dataType; 
+    }
+    else if (node->type == AST_READ)
+    {
+        if (node->son[0]->type == AST_KWCHAR)
+            node->dataType = DATATYPE_CHAR;
+        else if (node->son[0]->type == AST_KWINT)
+            node->dataType = DATATYPE_INT;
+        else if (node->son[0]->type == AST_KWFLOAT)
+            node->dataType = DATATYPE_FLOAT;
+        else if (node->son[0]->type == AST_KWBOOL)
+            node->dataType = DATATYPE_BOOL;
+        else
+            node->dataType = node->son[0]->dataType;  
+    }
     else if (isAritmeticOp(node->type))
     {
         AST *son0 = node->son[0];
@@ -230,6 +267,16 @@ void checkUsage(AST *node)
             fprintf(stderr, "SEMANTIC ERROR - Line %d: Attribution must be to a scalar variable.\n", node->line);
             semanticErrors++;
         }
+        if (node->son[1]->symbol && node->son[1]->symbol->type == SYMBOL_VECTOR)
+        {
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot assign a vector '%s' to a scalar variable.\n", node->line, node->son[1]->symbol->text);
+            semanticErrors++;
+        }
+        if (node->son[1]->symbol && node->son[1]->symbol->type == SYMBOL_FUNC)
+        {
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot assign a function '%s' to a scalar variable.\n", node->line, node->son[1]->symbol->text);
+            semanticErrors++;
+        }
         if (!isDataTypeCompatible(node->son[0]->symbol->dataType, node->son[1]->dataType))
         {
             fprintf(stderr, "SEMANTIC ERROR - Line %d: Attribution with incompatible datatype.\n", node->line);
@@ -250,6 +297,23 @@ void checkUsage(AST *node)
         if (!isInteger(node->son[0]->dataType))
         {
             fprintf(stderr, "SEMANTIC ERROR - Line %d: Index must be an integer.\n", node->line);
+            semanticErrors++;
+        }
+        break;
+    case AST_VECTOR:
+        if (node->son[0]->symbol->type == SYMBOL_VAR)
+        {
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Attempt to index a scalar variable '%s'.\n", node->line, node->son[0]->symbol->text);
+            semanticErrors++;
+        }
+        if (node->son[0]->symbol->type == SYMBOL_FUNC)
+        {
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Attempt to index a function '%s'.\n", node->line, node->son[0]->symbol->text);
+            semanticErrors++;
+        }
+        if (!isInteger(node->son[1]->dataType))
+        {
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Index for vector '%s' must be an integer type.\n", node->line, node->son[0]->symbol->text);
             semanticErrors++;
         }
         break;
@@ -283,9 +347,10 @@ void checkUsage(AST *node)
             fprintf(stderr, "Semantic ERROR - %d: Read only allowed to scalar variables.\n", node->line);
             semanticErrors++;
         }
-        if (!isDataTypeCompatible(node->son[0]->dataType, node->son[1]->symbol->dataType))
+        if (!isDataTypeCompatible(node->dataType, node->son[1]->symbol->dataType))
         {
-            fprintf(stderr, "SEMANTIC ERROR - Line %d: Read operation with incompatible types.\n", node->line);
+            fprintf(stderr, "SEMANTIC ERROR - Line %d: Read operation with incompatible types\n",
+                    node->line);
             semanticErrors++;
         }
         break;
@@ -302,7 +367,7 @@ void checkUsage(AST *node)
                 fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
                 semanticErrors++;
             }
-            if (!isDataTypeCompatible(node->son[1]->symbol->dataType, node->son[0]->dataType))
+            if (!isDataTypeCompatible(node->son[1]->symbol->dataType, node->dataType))
             {
                 fprintf(stderr, "SEMANTIC ERROR - Line %d: Incompatible types in print expression.\n", node->line);
                 semanticErrors++;
@@ -320,6 +385,18 @@ void checkUsage(AST *node)
             else if (node->son[0]->symbol->type == SYMBOL_VECTOR)
             {
                 fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot print a vector.\n", node->line);
+                semanticErrors++;
+            }
+        }
+        break;
+    case AST_RETURN:
+        if (node->son[0] && node->son[0]->symbol) {
+            if (node->son[0]->symbol->type == SYMBOL_VECTOR) {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot return a vector from a function.\n", node->line);
+                semanticErrors++;
+            }
+            if (node->son[0]->symbol->type == SYMBOL_FUNC) {
+                fprintf(stderr, "SEMANTIC ERROR - Line %d: Cannot return a function from a function.\n", node->line);
                 semanticErrors++;
             }
         }
