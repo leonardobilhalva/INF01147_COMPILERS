@@ -2,6 +2,7 @@
 	#include "hash.h"
 	#include "ast.h"
 	#include "semantic.h"
+    #include "tac.h"
 	#include <stdlib.h>
 
 	int yylex();
@@ -11,6 +12,14 @@
 	extern int semanticErrors;
 
 	AST* root;
+
+void makeRoot(AST* node)
+{
+	tac* newTac = tacGenerateCode(node, 0);//tacCodeGenerate(node);
+	tac* tacRev = tacRewind(newTac);
+	printAllTacs(tacRev);
+	//tacPrint(newTac);
+}
 %}
 
 %union
@@ -83,7 +92,7 @@
 
 %%
 
-program: head { root = $$; astPrint($1, 0); semanticErrors = verifySemantic($1);}
+program: head { root = $$; astPrint($1, 0); semanticErrors = verifySemantic($1); makeRoot($1);}
     ;
 
 head: globalVar ';' tail { $$ = astCreate(AST_HEAD_GLOBAL_VAR, 0, $1, $3, 0, 0, getLineNumber()); }
@@ -107,7 +116,7 @@ loopVector: value loopVector { $$ = astCreate(AST_GLOBAL_VECTOR_LOOP, 0, $1, $2,
     | { $$ = 0; }
     ;
 
-function: type identifier '(' params ')' block { $$ = astCreate(AST_FUNCDECL, 0, $1, $2, $4, $6, getLineNumber()); }
+function: type identifier '(' params ')' block { $$ = astCreate(AST_FUNCDECL, $2->symbol, $1, $2, $4, $6, getLineNumber()); }
     ;
 
 params: nonemptyParams { $$ = $1; }
@@ -204,6 +213,10 @@ identifier: 	TK_IDENTIFIER							{ $$ = astCreate(AST_SYMBOL, $1, 0, 0, 0, 0, ge
 	;
 
 %%
+
+tac* getTACs(){
+  return tacRewind(tacGenerateCode(root, 0));
+}
 
 void checkSemantic(){
   if(semanticErrors > 0){
