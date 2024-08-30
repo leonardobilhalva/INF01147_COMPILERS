@@ -80,3 +80,19 @@ void hashPrint(void)
         for (node = Table[i]; node; node = node->next)
             printf("Table[%d] has %s\n", i, node->text);
 }
+
+HASH_NODE *makeTemp()
+{
+    static int serialNumber = 0;
+    static char buffer[128];
+    sprintf(buffer, "_temp%d", serialNumber++);
+    return hashInsert(buffer, SYMBOL_IDENTIFIER, 0);
+}
+
+HASH_NODE *makeLabel()
+{
+    static int serialNumber = 0;
+    static char buffer[128];
+    sprintf(buffer, "_label%d", serialNumber++);
+    return hashInsert(buffer, SYMBOL_IDENTIFIER, 0);
+}
