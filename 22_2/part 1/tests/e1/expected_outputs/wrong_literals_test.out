@@ -1,0 +1,14 @@
+Found TOKEN_ERROR
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Found TOKEN_ERROR
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Found TK_IDENTIFIER
+Símbolo: abc, Tipo: 280
+Símbolo: bcd, Tipo: 280
+Símbolo: missing, Tipo: 280
+Símbolo: quote, Tipo: 280
+Main done! File has 4 lines
