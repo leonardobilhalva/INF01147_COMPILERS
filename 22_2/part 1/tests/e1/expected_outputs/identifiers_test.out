@@ -1,0 +1,20 @@
+Found TK_IDENTIFIER
+Found TK_IDENTIFIER
+Found TK_IDENTIFIER
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Found TK_IDENTIFIER
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Found TK_IDENTIFIER
+Found TOKEN_ERROR
+Found TK_IDENTIFIER
+Símbolo: 123valid, Tipo: 280
+Símbolo: ID, Tipo: 280
+Símbolo: Invalid, Tipo: 280
+Símbolo: Underscore, Tipo: 280
+Símbolo: anotherValid123, Tipo: 280
+Símbolo: validID, Tipo: 280
+Símbolo: with, Tipo: 280
+Símbolo: withUnderscoreAtStart, Tipo: 280
+Main done! File has 6 lines
