@@ -7,7 +7,6 @@
 int running = 1;
 int lineNumber = 1;
 %}
-%option c++
 
 %x COMMENT
 

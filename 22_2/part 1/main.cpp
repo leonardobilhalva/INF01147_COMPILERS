@@ -25,7 +25,7 @@ int main(int argc, char **argv)
       return 1;
   }
 
-    FlexLexer* lexer = new yyFlexLexer(&yyin, &cout);
+  FlexLexer* lexer = new yyFlexLexer(&yyin, &cout);
 
   while (running)
   {
