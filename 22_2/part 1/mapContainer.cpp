@@ -1,6 +1,6 @@
 // Leonardo Bilhalva - 315768 | Artur Turatti - 304740
 #include "mapContainer.h"
-#include <iostream>
+#include <iostream> // cout
 
 using namespace std;
 
@@ -14,6 +14,6 @@ void insertSymbol(const string& text, int type) {
 
 void printSymbolTable() {
     for (map<string, Symbol>::iterator it = symbolTable.begin(); it != symbolTable.end(); ++it) {
-        cout << "Símbolo: " << it->first << ", Tipo: " << it->second.type << endl;
+        cout << "Symbol: " << it->first << ", Type: " << it->second.type << endl;
     }
 }
