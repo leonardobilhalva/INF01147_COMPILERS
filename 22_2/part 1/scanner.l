@@ -32,10 +32,10 @@ return           {return KW_RETURN;}
 [ \t]            
 "\n"             {lineNumber++;}
 "//".* 
-"/*"             {BEGIN (COMMENT);}
+"/**"             {BEGIN (COMMENT);}
 .                {return TOKEN_ERROR;}
 
-<COMMENT>"*/"    {BEGIN (INITIAL);} 
+<COMMENT>"**/"    {BEGIN (INITIAL);} 
 <COMMENT>"\n"    {lineNumber++;}
 <COMMENT>. 
 
