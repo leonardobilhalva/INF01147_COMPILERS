@@ -49,3 +49,10 @@ int yyFlexLexer::yywrap() {
 int getLineNumber(void){
     return lineNumber;
 }
+
+void initMe(void){
+}
+
+int isRunning(void){
+    return running;
+}
