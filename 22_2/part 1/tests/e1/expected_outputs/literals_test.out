@@ -4,10 +4,10 @@ Found LIT_STRING
 Found LIT_STRING
 Found LIT_STRING
 Found LIT_STRING
-Símbolo: "empty string: ", Tipo: 286
-Símbolo: "escaped quote: \" ", Tipo: 286
-Símbolo: "hello world", Tipo: 286
-Símbolo: "new line: \n", Tipo: 286
-Símbolo: #123, Tipo: 281
-Símbolo: 'a', Tipo: 282
+Symbol: "empty string: ", Type: 286
+Symbol: "escaped quote: \" ", Type: 286
+Symbol: "hello world", Type: 286
+Symbol: "new line: \n", Type: 286
+Symbol: #123, Type: 281
+Symbol: 'a', Type: 282
 Main done! File has 6 lines
