@@ -101,7 +101,8 @@ return : KW_RETURN expr;
 
 listPrintArgs: string listPrintArgs
     | expr listPrintArgs
-    |
+    | expr
+    | string
     ;
 
 expr: '(' expr ')'
