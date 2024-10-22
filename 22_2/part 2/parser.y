@@ -116,6 +116,7 @@ expr: '(' expr ')'
     | expr '<' expr
     | expr '&' expr
     | expr '|' expr
+    | expr '=' expr
     | expr '~' expr
     | identifier '(' functionCallParams ')'
     ;
