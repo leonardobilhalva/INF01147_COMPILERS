@@ -45,7 +45,32 @@
 
 %%
 
-program: ;
+program: listGlobaDec;
+
+listGlobaDec: globalDec ';' listGlobaDec
+            | 
+            ;
+
+globalDec: type identifier '=' value 
+            | type identifier'['int']' 
+            | type identifier'['int']' '=' listArgs
+            ;
+
+listArgs: value listArgs
+        | 
+        ;
+
+identifier: TK_IDENTIFIER;
+
+value: LIT_CHAR
+    | int
+    ;
+
+int : LIT_INT;
+
+type: KW_CHAR
+    | KW_INT
+    ;
 
 %%
 
