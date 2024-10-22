@@ -64,6 +64,7 @@ listArgs: value listArgs
 function: type identifier '(' functionParams ')' block;
 
 functionParams: type identifier ',' functionParams
+        | type identifier 
         |
         ;
 
@@ -77,6 +78,8 @@ cmd: block
     | assign ';'
     | print ';'
     | read ';'
+    | return ';'
+    | flowControl
     | ';'
     ;
 
@@ -84,9 +87,17 @@ assign: identifier '=' expr
     | identifier '[' expr ']' '=' expr
     ;
 
+
+flowControl: KW_IF '(' expr ')' KW_THEN cmd
+    | KW_IF '(' expr ')' KW_THEN cmd KW_ELSE cmd
+    | KW_WHILE '(' expr ')' cmd
+    ;
+
 print : KW_PRINT listPrintArgs;
 
 read : KW_READ identifier;
+
+return : KW_RETURN expr;
 
 listPrintArgs: string listPrintArgs
     | expr listPrintArgs
@@ -109,7 +120,8 @@ expr: '(' expr ')'
     | identifier '(' functionCallParams ')'
     ;
     
-functionCallParams: identifier ',' functionParams
+functionCallParams: expr ',' functionCallParams
+        | expr
         |
         ;
 
