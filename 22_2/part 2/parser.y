@@ -142,8 +142,10 @@ type: KW_CHAR
 
 %%
 
+using namespace std;
+
 void yy::parser::error(const std::string &message)
 {
-fprintf(stderr,"Syntax error at line %d\n", getLineNumber());
-exit (3);
+    cerr << "Syntax error at line " << getLineNumber() << ": " << message << endl;
+    exit(3);
 }
