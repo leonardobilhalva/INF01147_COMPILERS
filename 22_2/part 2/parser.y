@@ -48,7 +48,8 @@
 program: listGlobaDec;
 
 listGlobaDec: globalDec ';' listGlobaDec
-            | 
+            | function listGlobaDec
+            |
             ;
 
 globalDec: type identifier '=' value 
@@ -60,6 +61,58 @@ listArgs: value listArgs
         | 
         ;
 
+function: type identifier '(' functionParams ')' block;
+
+functionParams: type identifier ',' functionParams
+        |
+        ;
+
+block: '{' lcmd '}';
+
+lcmd: cmd lcmd
+    |
+    ;
+
+cmd: block
+    | assign ';'
+    | print ';'
+    | read ';'
+    | ';'
+    ;
+
+assign: identifier '=' expr
+    | identifier '[' expr ']' '=' expr
+    ;
+
+print : KW_PRINT listPrintArgs;
+
+read : KW_READ identifier;
+
+listPrintArgs: string listPrintArgs
+    | expr listPrintArgs
+    |
+    ;
+
+expr: '(' expr ')'
+    | identifier
+    | identifier '[' expr ']'
+    | value
+    | expr '+' expr
+    | expr '-' expr
+    | expr '*' expr
+    | expr '/' expr
+    | expr '>' expr
+    | expr '<' expr
+    | expr '&' expr
+    | expr '|' expr
+    | expr '~' expr
+    | identifier '(' functionCallParams ')'
+    ;
+    
+functionCallParams: identifier ',' functionParams
+        |
+        ;
+
 identifier: TK_IDENTIFIER;
 
 value: LIT_CHAR
@@ -67,6 +120,8 @@ value: LIT_CHAR
     ;
 
 int : LIT_INT;
+
+string: LIT_STRING;
 
 type: KW_CHAR
     | KW_INT
