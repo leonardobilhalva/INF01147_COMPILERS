@@ -1,3 +1,4 @@
 ## added ignore for dummy files created from make
 etapa1
 lex.yy.c
+.DS_Store
