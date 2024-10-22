@@ -12,7 +12,7 @@ etapa2: lex.yy.o $(OBJECTS)
 lex.yy.cpp: scanner.l y.tab.hpp
 	flex --c++ -o lex.yy.cpp scanner.l
 
-# -d generates header(hpp
+# -d generates header(hpp)
 y.tab.cpp y.tab.hpp: parser.y
 	bison -d --language=c++ -o y.tab.cpp parser.y
 
