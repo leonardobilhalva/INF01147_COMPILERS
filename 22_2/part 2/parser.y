@@ -45,25 +45,25 @@
 
 %%
 
-program: listGlobaDec;
+program: listGlobalDec;
 
-listGlobaDec: globalDec ';' listGlobaDec
-            | function listGlobaDec
+listGlobalDec: varDec ';' listGlobalDec
+            | functionDec listGlobalDec
             |
             ;
 
-globalDec: type identifier '=' value 
+varDec: type identifier '=' value 
             | type identifier'['int']' 
-            | type identifier'['int']' '=' listArgs
+            | type identifier'['int']' '=' vecParams
             ;
 
-listArgs: value listArgs
+vecParams: value vecParams
         | 
         ;
 
-function: type identifier '(' functionParams ')' block;
+functionDec: type identifier '(' functionDecParams ')' block;
 
-functionParams: type identifier ',' functionParams
+functionDecParams: type identifier ',' functionDecParams
         | type identifier 
         |
         ;
@@ -87,17 +87,16 @@ assign: identifier '=' expr
     | identifier '[' expr ']' '=' expr
     ;
 
-
-flowControl: KW_IF '(' expr ')' KW_THEN cmd
-    | KW_IF '(' expr ')' KW_THEN cmd KW_ELSE cmd
-    | KW_WHILE '(' expr ')' cmd
-    ;
-
 print : KW_PRINT listPrintArgs;
 
 read : KW_READ identifier;
 
 return : KW_RETURN expr;
+
+flowControl: KW_IF '(' expr ')' KW_THEN cmd
+    | KW_IF '(' expr ')' KW_THEN cmd KW_ELSE cmd
+    | KW_WHILE '(' expr ')' cmd
+    ;
 
 listPrintArgs: string listPrintArgs
     | expr listPrintArgs
