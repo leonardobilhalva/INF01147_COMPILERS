@@ -63,10 +63,13 @@ vecParams: value vecParams
 
 functionDec: type identifier '(' functionDecParams ')' block;
 
-functionDecParams: type identifier ',' functionDecParams
-        | type identifier 
-        |
-        ;
+functionDecParams: type identifier nonEmptyFunctionDecParams
+                 |
+                 ;
+
+nonEmptyFunctionDecParams: ',' type identifier nonEmptyFunctionDecParams
+          |
+          ;
 
 block: '{' lcmd '}';
 
@@ -121,10 +124,14 @@ expr: '(' expr ')'
     | identifier '(' functionCallParams ')'
     ;
     
-functionCallParams: expr ',' functionCallParams
+functionCallParams: expr nonEmptyFunctionCallParams
         | expr
         |
         ;
+
+nonEmptyFunctionCallParams: ',' expr nonEmptyFunctionCallParams
+          |
+          ;
 
 identifier: TK_IDENTIFIER;
 
