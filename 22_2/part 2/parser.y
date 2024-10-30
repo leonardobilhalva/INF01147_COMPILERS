@@ -125,7 +125,6 @@ expr: '(' expr ')'
     ;
     
 functionCallParams: expr nonEmptyFunctionCallParams
-        | expr
         |
         ;
 
