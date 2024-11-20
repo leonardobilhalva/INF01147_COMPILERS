@@ -1,0 +1,9 @@
+char
+int
+if
+then
+else
+while
+read
+print
+return
