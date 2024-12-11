@@ -6,15 +6,15 @@
 #include <map>
 
 using namespace std;
-
-struct Symbol {
-    int type;      
-    string text;   
+struct Symbol
+{
+  int type;
+  string text;
 };
 
 extern map<string, Symbol> symbolTable;
 
-void insertSymbol(const string& text, int type);
+void insertSymbol(const string &text, int type);
 void printSymbolTable();
 
-#endif 
+#endif // MAPCONTAINER_H
