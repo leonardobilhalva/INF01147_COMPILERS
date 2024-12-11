@@ -1,0 +1,4 @@
+#     // Wrong Integer: Integer literals must consist of one or more digits
+#abc  // Wrong Integer: Integer literals must be numeric - will correctly recognize abc as an identifier
+'bcd' // Wrong Character: Character literals must contain only one character - will correctly recognize bcd as an identifier
+"missing quote // Wrong String: Missing closing double quotation marks - will correctly recognize missing and quote as identifiers
