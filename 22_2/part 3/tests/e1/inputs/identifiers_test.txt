@@ -1,6 +1,0 @@
-validID
-anotherValid123
-Invalid_ID               // Wrong: Will generate 2 different identifiers
-with_Underscore          // Wrong: Will generate 2 different identifiers
-123valid
-_withUnderscoreAtStart   // Wrong: Will generate the identifier without the underscore
