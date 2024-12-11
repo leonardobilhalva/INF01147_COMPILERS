@@ -1,41 +1,26 @@
-%require "3.2"
-%language "c++"
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include "mapContainer.h"
 
-%code requires {
-    // Leonardo Bilhalva - 315768 | Artur Turatti - 304740
-    // explanation for parser interface https://stackoverflow.com/questions/76509844/how-do-you-interface-c-flex-with-c-bison
-    #include <string>
-    #include "lexer.hh"
-    extern int getLineNumber();
-}
+extern int yylex();
+extern void yyerror(const char *message);
+extern int getLineNumber();
+%}
 
-%define api.value.type {std::string}
-
-%parse-param {Lexer &lexer}
-
-%header
-
-%code {
-    #define yylex lexer.yylex
-}
-
-%token KW_CHAR           
-%token KW_INT        
-
-%token KW_IF             
+%token KW_CHAR
+%token KW_INT
+%token KW_IF
 %token KW_THEN
-%token KW_ELSE           
-%token KW_WHILE          
-%token KW_READ           
-%token KW_PRINT          
-%token KW_RETURN         
-    
-%token TK_IDENTIFIER     
-
-%token LIT_INT           
-%token LIT_CHAR    
-%token LIT_STRING        
-
+%token KW_ELSE
+%token KW_WHILE
+%token KW_READ
+%token KW_PRINT
+%token KW_RETURN
+%token TK_IDENTIFIER
+%token LIT_INT
+%token LIT_CHAR
+%token LIT_STRING
 %token TOKEN_ERROR
 
 %left '&' '|' '~'
@@ -52,13 +37,13 @@ listGlobalDec: varDec ';' listGlobalDec
             |
             ;
 
-varDec: type identifier '=' value 
-            | type identifier'['int']' 
-            | type identifier'['int']' '=' vecParams
+varDec: type identifier '=' value
+            | type identifier '[' int ']'
+            | type identifier '[' int ']' '=' vecParams
             ;
 
 vecParams: value vecParams
-        | 
+        |
         ;
 
 functionDec: type identifier '(' functionDecParams ')' block;
@@ -90,11 +75,11 @@ assign: identifier '=' expr
     | identifier '[' expr ']' '=' expr
     ;
 
-print : KW_PRINT listPrintArgs;
+print: KW_PRINT listPrintArgs;
 
-read : KW_READ identifier;
+read: KW_READ identifier;
 
-return : KW_RETURN expr;
+return: KW_RETURN expr;
 
 flowControl: KW_IF '(' expr ')' KW_THEN cmd
     | KW_IF '(' expr ')' KW_THEN cmd KW_ELSE cmd
@@ -123,7 +108,7 @@ expr: '(' expr ')'
     | expr '~' expr
     | identifier '(' functionCallParams ')'
     ;
-    
+
 functionCallParams: expr nonEmptyFunctionCallParams
         |
         ;
@@ -138,7 +123,7 @@ value: LIT_CHAR
     | int
     ;
 
-int : LIT_INT;
+int: LIT_INT;
 
 string: LIT_STRING;
 
@@ -148,10 +133,6 @@ type: KW_CHAR
 
 %%
 
-using namespace std;
-
-void yy::parser::error(const std::string &message)
-{
-    cerr << "Syntax error at line " << getLineNumber() << ": " << message << endl;
-    exit(3);
+void yyerror(const char *message) {
+    fprintf(stderr, "Syntax error at line %d: %s\n", getLineNumber(), message);
 }
