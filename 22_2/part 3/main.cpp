@@ -15,23 +15,23 @@ extern int running;
 
 int main(int argc, char **argv)
 {
-  if (argc < 2)
+  if (argc < 3)
   {
-    cerr << "Usage: ./etapa2 <file_name>" << endl;
+    cerr << "Usage: ./etapa2 <input_file> <output_file>" << endl;
     return 1;
   }
 
   ifstream inputFile(argv[1]);
   if (!inputFile.is_open())
   {
-    cerr << "Error opening file: " << argv[1] << endl;
+    cerr << "Error opening input file: " << argv[1] << endl;
     return 1;
   }
 
   yyin = fopen(argv[1], "r");
   if (!yyin)
   {
-    cerr << "Error associating FILE* for lexer" << endl;
+    cerr << "Error associating FILE* for lexer with file: " << argv[1] << endl;
     return 1;
   }
 
@@ -42,20 +42,32 @@ int main(int argc, char **argv)
   else
   {
     cerr << "Parsing failed." << endl;
-    exit(3);
+    fclose(yyin);
+    return 3;
   }
 
-  AST *root = getRoot();
+  root = getRoot();
   if (root)
   {
-    std::ofstream outputFile("output.txt");
+    ofstream outputFile(argv[2]);
+    if (!outputFile.is_open())
+    {
+      cerr << "Error opening output file: " << argv[2] << endl;
+      fclose(yyin);
+      return 3;
+    }
+
     astPrintCode(root, outputFile);
     outputFile.close();
   }
-  return 0;
+  else
+  {
+    cerr << "AST root is null. No code to print." << endl;
+  }
+
+  fclose(yyin);
 
   cout << "Main done! File has " << lineNumber << " lines" << endl;
-  fclose(yyin);
 
   return 0;
 }
