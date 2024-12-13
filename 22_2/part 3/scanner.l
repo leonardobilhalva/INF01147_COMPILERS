@@ -1,11 +1,9 @@
 %{
 // Leonardo Bilhalva - 315768 | Artur Turatti - 304740
 #include "y.tab.h"
+#include "ast.hh"
 #include "mapContainer.h"
 #include <string>
-
-extern int lineNumber;
-void insertSymbol(const string &text, int type);
 
 int running = 1;
 int lineNumber = 1;
@@ -27,10 +25,10 @@ return           { return KW_RETURN; }
 
 [-,;:()\[\]{}=+*/%<>&|~]            { return yytext[0]; }
 
-[a-zA-Z0-9]*                        { insertSymbol(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
-#[0-9]+                             { insertSymbol(yytext, LIT_INT); return LIT_INT; }
-'.'                                 { insertSymbol(yytext, LIT_CHAR); return LIT_CHAR; }
-\"(\\.|[^"])*\"                     { insertSymbol(yytext, LIT_STRING); return LIT_STRING; }
+[a-zA-Z0-9]*                        { yylval.symbol = insertSymbol(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
+#[0-9]+                             { yylval.symbol = insertSymbol(yytext, LIT_INT); return LIT_INT; }
+'.'                                 { yylval.symbol = insertSymbol(yytext, LIT_CHAR); return LIT_CHAR; }
+\"(\\.|[^"])*\"                     { yylval.symbol = insertSymbol(yytext, LIT_STRING); return LIT_STRING; }
 
 [ \t]
 "\n"             { lineNumber++; }
