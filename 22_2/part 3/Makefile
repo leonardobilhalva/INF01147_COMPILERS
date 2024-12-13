@@ -7,6 +7,8 @@ PARSER = y.tab.c y.tab.h
 OBJS = main.o y.tab.o lex.yy.o mapContainer.o ast.o
 TARGET = etapa3
 
+.PHONY: all clean test
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -34,4 +36,14 @@ ast.o: ast.cpp ast.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(LEXER) y.tab.* $(TARGET)
+	rm -f $(OBJS) $(LEXER) y.tab.* $(TARGET) output.txt outnew.txt
+
+test: $(TARGET)
+	@echo "Compiling the project..."
+	$(MAKE) etapa3
+	@echo "Running ./etapa3 with sample.txt -> output.txt"
+	./etapa3 sample.txt output.txt
+	@echo "Running ./etapa3 with output.txt -> outnew.txt"
+	./etapa3 output.txt outnew.txt
+	@echo "Comparing output.txt and outnew.txt"
+	diff output.txt outnew.txt && echo "The files are identical." || echo "The files differ."
