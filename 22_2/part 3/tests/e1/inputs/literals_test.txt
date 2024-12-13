@@ -1,6 +1,0 @@
-#123
-'a'
-"hello world"
-"escaped quote: \" "
-"new line: \n"
-"empty string: "
