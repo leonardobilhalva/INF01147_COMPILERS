@@ -1,11 +1,15 @@
+// Leonardo Bilhalva - 315768 | Artur Turatti - 304740
 #include <iostream>       // std inputs and outputs -> cerr | cout
 #include <fstream>        // file management -> file management
 #include "mapContainer.h" // map container -> symbol table
 #include "y.tab.h"        // bison stuff
+#include "ast.hh"         // bison stuff
 
-extern FILE *yyin; // lexer stuff
 using namespace std;
 
+AST *root = nullptr;   // ast stuff
+extern FILE *yyin;     // lexer stuff
+extern AST *getRoot(); // ast stuff
 extern int lineNumber;
 extern int running;
 
@@ -34,13 +38,23 @@ int main(int argc, char **argv)
   if (yyparse() == 0)
   {
     printSymbolTable();
-    cout << "Main done! File has " << lineNumber << " lines" << endl;
   }
   else
   {
     cerr << "Parsing failed." << endl;
+    exit(3);
   }
 
+  AST *root = getRoot();
+  if (root)
+  {
+    std::ofstream outputFile("output.txt");
+    astPrintCode(root, outputFile);
+    outputFile.close();
+  }
+  return 0;
+
+  cout << "Main done! File has " << lineNumber << " lines" << endl;
   fclose(yyin);
 
   return 0;
