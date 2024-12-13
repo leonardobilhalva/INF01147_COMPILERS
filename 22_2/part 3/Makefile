@@ -4,8 +4,8 @@ BISON = bison
 FLEX = flex
 LEXER = lex.yy.c
 PARSER = y.tab.c y.tab.h
-OBJS = main.o y.tab.o lex.yy.o mapContainer.o
-TARGET = etapa2
+OBJS = main.o y.tab.o lex.yy.o mapContainer.o ast.o
+TARGET = etapa3
 
 all: $(TARGET)
 
@@ -18,16 +18,19 @@ lex.yy.c: scanner.l
 y.tab.c y.tab.h: parser.y
 	$(BISON) -d -o y.tab.c $^
 
-main.o: main.cpp mapContainer.h y.tab.h
+main.o: main.cpp mapContainer.h y.tab.h ast.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 y.tab.o: y.tab.c
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-lex.yy.o: lex.yy.c y.tab.h mapContainer.h
+lex.yy.o: lex.yy.c y.tab.h mapContainer.h ast.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 mapContainer.o: mapContainer.cpp mapContainer.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+ast.o: ast.cpp ast.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
