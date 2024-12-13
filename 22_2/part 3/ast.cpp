@@ -138,10 +138,12 @@ void astPrintCode(AST *node, std::ostream &output)
   case AST_FUNCTION_DEC_PARAMS:
   case AST_NONEMPTY_FUNCTION_DEC_PARAMS:
     astPrintCode(node->sons[0], output);
-    if (node->sons[1])
+    output << " ";
+    astPrintCode(node->sons[1], output);
+    if (node->sons[2])
     {
       output << ", ";
-      astPrintCode(node->sons[1], output);
+      astPrintCode(node->sons[2], output);
     }
     break;
 
