@@ -14,7 +14,7 @@ struct Symbol
 
 extern map<string, Symbol> symbolTable;
 
-void insertSymbol(const string &text, int type);
+Symbol *insertSymbol(const string &text, int type);
 void printSymbolTable();
 
 #endif // MAPCONTAINER_H

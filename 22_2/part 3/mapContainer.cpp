@@ -6,9 +6,11 @@ using namespace std;
 
 map<string, Symbol> symbolTable;
 
-void insertSymbol(const string &text, int type)
+Symbol *insertSymbol(const string &text, int type)
 {
-  symbolTable[text] = {type, text};
+  auto result = symbolTable.emplace(text, Symbol{type, text});
+
+  return &(result.first->second);
 }
 
 void printSymbolTable()
