@@ -182,7 +182,7 @@ void astPrintCode(AST *node, std::ostream &output)
   case AST_IF:
     output << "if (";
     astPrintCode(node->sons[0], output);
-    output << ") \n";
+    output << ") then\n";
     astPrintCode(node->sons[1], output);
     break;
 
