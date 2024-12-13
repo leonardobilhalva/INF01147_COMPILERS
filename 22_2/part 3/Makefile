@@ -38,9 +38,7 @@ ast.o: ast.cpp ast.hh
 clean:
 	rm -f $(OBJS) $(LEXER) y.tab.* $(TARGET) output.txt outnew.txt
 
-test: $(TARGET)
-	@echo "Compiling the project..."
-	$(MAKE) etapa3
+test:
 	@echo "Running ./etapa3 with sample.txt -> output.txt"
 	./etapa3 sample.txt output.txt
 	@echo "Running ./etapa3 with output.txt -> outnew.txt"
