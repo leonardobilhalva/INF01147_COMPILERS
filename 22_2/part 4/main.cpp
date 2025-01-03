@@ -3,7 +3,8 @@
 #include <fstream>        // file management -> file management
 #include "mapContainer.h" // map container -> symbol table
 #include "y.tab.h"        // bison stuff
-#include "ast.hh"         // bison stuff
+#include "ast.hh"
+#include "semantic.hh" // semantic stuff
 
 using namespace std;
 
@@ -12,6 +13,8 @@ extern FILE *yyin;     // lexer stuff
 extern AST *getRoot(); // ast stuff
 extern int lineNumber;
 extern int running;
+
+extern int checkSemantic();
 
 int main(int argc, char **argv)
 {
@@ -37,7 +40,7 @@ int main(int argc, char **argv)
 
   if (yyparse() == 0)
   {
-    printSymbolTable();
+    // printSymbolTable();
   }
   else
   {
@@ -47,23 +50,27 @@ int main(int argc, char **argv)
   }
 
   root = getRoot();
-  if (root)
-  {
-    ofstream outputFile(argv[2]);
-    if (!outputFile.is_open())
-    {
-      cerr << "Error opening output file: " << argv[2] << endl;
-      fclose(yyin);
-      return 3;
-    }
+  // if (root)
+  // {
+  //   ofstream outputFile(argv[2]);
+  //   if (!outputFile.is_open())
+  //   {
+  //     cerr << "Error opening output file: " << argv[2] << endl;
+  //     fclose(yyin);
+  //     return 3;
+  //   }
 
-    astPrintCode(root, outputFile);
-    outputFile.close();
-  }
-  else
-  {
-    cerr << "AST root is null. No code to print." << endl;
-  }
+  //   astPrintCode(root, outputFile);
+  //   outputFile.close();
+  // }
+  // else
+  // {
+  //   cerr << "AST root is null. No code to print." << endl;
+  // }
+
+  fprintf(stderr, "Checking Semantic...\n");
+  checkSemantic();
+  fprintf(stderr, "No Semantic Errors.\n");
 
   fclose(yyin);
 
