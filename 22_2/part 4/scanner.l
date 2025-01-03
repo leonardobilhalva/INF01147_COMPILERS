@@ -25,10 +25,10 @@ return           { return KW_RETURN; }
 
 [-,;:()\[\]{}=+*/%<>&|~]            { return yytext[0]; }
 
-[a-zA-Z0-9]*                        { yylval.symbol = insertSymbol(yytext, TK_IDENTIFIER); return TK_IDENTIFIER; }
-#[0-9]+                             { yylval.symbol = insertSymbol(yytext, LIT_INT); return LIT_INT; }
-'.'                                 { yylval.symbol = insertSymbol(yytext, LIT_CHAR); return LIT_CHAR; }
-\"(\\.|[^"])*\"                     { yylval.symbol = insertSymbol(yytext, LIT_STRING); return LIT_STRING; }
+[a-zA-Z0-9]*                        { yylval.symbol = insertSymbol(yytext, SYMBOL_IDENTIFIER); return TK_IDENTIFIER; }
+#[0-9]+                             { yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_INT); return LIT_INT; }
+'.'                                 { yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_CHAR); return LIT_CHAR; }
+\"(\\.|[^"])*\"                     { yylval.symbol = insertSymbol(yytext, SYMBOL_LIT_STRING); return LIT_STRING; }
 
 [ \t]
 "\n"             { lineNumber++; }
