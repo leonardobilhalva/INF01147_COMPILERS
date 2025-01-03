@@ -14,9 +14,9 @@ int verifySemantic(AST *root)
   ROOT = root;
 
   setIdentifierTypes(root);
-  setDataTypes(root);
-  checkUsageConsistency(root);
-  checkUndeclared();
+  // setDataTypes(root);
+  // checkUsageConsistency(root);
+  // checkUndeclared();
 
   return semanticErrors;
 }
@@ -56,10 +56,9 @@ void setIdentifierTypes(AST *node)
       else
       {
         node->sons[1]->symbol->type = SYMBOL_VAR;
-        if (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
-          node->sons[1]->symbol->dataType = DATATYPE_CHAR;
-        else if (node->sons[0] && node->sons[0]->type == AST_KW_INT)
-          node->sons[1]->symbol->dataType = DATATYPE_INT;
+        node->sons[1]->symbol->dataType = (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
+                                              ? DATATYPE_CHAR
+                                              : DATATYPE_INT;
       }
     }
     else
@@ -81,10 +80,9 @@ void setIdentifierTypes(AST *node)
       else
       {
         node->sons[1]->symbol->type = SYMBOL_VECTOR;
-        if (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
-          node->sons[1]->symbol->dataType = DATATYPE_CHAR;
-        else if (node->sons[0] && node->sons[0]->type == AST_KW_INT)
-          node->sons[1]->symbol->dataType = DATATYPE_INT;
+        node->sons[1]->symbol->dataType = (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
+                                              ? DATATYPE_CHAR
+                                              : DATATYPE_INT;
       }
     }
     else
@@ -99,21 +97,21 @@ void setIdentifierTypes(AST *node)
     {
       if (node->sons[1]->symbol->type != SYMBOL_IDENTIFIER)
       {
-        cerr << "Semantic error: function " << node->sons[1]->symbol->text << " already declared" << endl;
+        cerr << "Semantic error: function " << node->sons[1]->symbol->text
+             << " already declared at line " << node->line << endl;
         semanticErrors++;
       }
       else
       {
         node->sons[1]->symbol->type = SYMBOL_FUNC;
-        if (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
-          node->sons[1]->symbol->dataType = DATATYPE_CHAR;
-        else if (node->sons[0] && node->sons[0]->type == AST_KW_INT)
-          node->sons[1]->symbol->dataType = DATATYPE_INT;
+        node->sons[1]->symbol->dataType = (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
+                                              ? DATATYPE_CHAR
+                                              : DATATYPE_INT;
       }
     }
     else
     {
-      cerr << "Semantic error: symbol is null for function declaration" << endl;
+      cerr << "Semantic error: symbol is null for function declaration at line " << node->line << endl;
       semanticErrors++;
     }
     break;
@@ -124,21 +122,21 @@ void setIdentifierTypes(AST *node)
     {
       if (node->sons[1]->symbol->type != SYMBOL_IDENTIFIER)
       {
-        cerr << "Semantic error: parameter " << node->sons[1]->symbol->text << " already declared" << endl;
+        cerr << "Semantic error: parameter " << node->sons[1]->symbol->text
+             << " already declared at line " << node->line << endl;
         semanticErrors++;
       }
       else
       {
-        node->sons[1]->symbol->type = SYMBOL_VAR;
-        if (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
-          node->sons[1]->symbol->dataType = DATATYPE_CHAR;
-        else if (node->sons[0] && node->sons[0]->type == AST_KW_INT)
-          node->sons[1]->symbol->dataType = DATATYPE_INT;
+        node->sons[1]->symbol->type = SYMBOL_PARAM;
+        node->sons[1]->symbol->dataType = (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
+                                              ? DATATYPE_CHAR
+                                              : DATATYPE_INT;
       }
     }
     else
     {
-      cerr << "Semantic error: function parameter node or symbol is null" << endl;
+      cerr << "Semantic error: symbol is null for parameter declaration at line " << node->line << endl;
       semanticErrors++;
     }
     break;
@@ -180,8 +178,6 @@ void setDataTypes(AST *node)
     if (node->symbol)
     {
       node->dataType = node->symbol->dataType;
-      cerr << "DEBUG: Set dataType for SYMBOL node at line " << node->line
-           << " to " << node->dataType << endl;
     }
     break;
 
