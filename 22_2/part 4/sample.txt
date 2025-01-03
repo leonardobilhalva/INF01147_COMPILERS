@@ -6,17 +6,17 @@ char 7 = #100;
 int number = 'A';
 int 1 = #1;
 int v[#10] = 'a' #0'b'#0 #0 #0 #0 #0 #0 #0;
-int matrix[#100]; 
+int matrix[#100];
 
 /**
-Este eh um comentario 
-de multiplas 
+Este eh um comentario
+de multiplas
 linhas
 **/
 
 int main ()
   {
-  number = 0;
+  number = #0;
   7 = 7 - 1;
   7 = #5;
   v[7] = #55;
@@ -26,9 +26,9 @@ int main ()
   print "Digite um numero: \n";
   read 7;
 
-  while (i<#10)
+  while (1<#10)
     {
-    1 = incn(1,#1);
+    1 = incn(1);
     7 = incn(7,7);
     }
 
@@ -39,13 +39,13 @@ int main ()
     a = a + #1;
     print "A era=#15\n";
     };
-    
+
   if (1=#100) then
     {
     print "Nao tem como isso...\n";
     }
   else
-    print "OK!\n"; 
+    print "OK!\n";
   {{}} {}
   }
 
@@ -55,6 +55,3 @@ int incn (int x, int n )
   }
 
 // end of file
-  
-
-
