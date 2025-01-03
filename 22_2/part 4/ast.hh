@@ -7,6 +7,8 @@
 
 using namespace std;
 
+extern string astTypeName[];
+
 enum astType
 {
   AST_PROGRAM,
@@ -58,9 +60,11 @@ struct AST
   int type;
   Symbol *symbol;
   vector<AST *> sons;
+  int line;
+  int dataType;
 
 public:
-  AST(int t, vector<AST *> v, Symbol *s = 0) : type(t), symbol(s), sons(v) {}
+  AST(int t, vector<AST *> v, Symbol *s = 0, int l = 0, int dt = -1) : type(t), symbol(s), sons(v), line(l), dataType(dt) {}
 };
 
 void astPrint(AST *node, int level);
