@@ -1,3 +1,4 @@
+// Leonardo Bilhalva - 315768 | Artur Turatti - 304740
 #include "semantic.hh"
 #include "ast.hh"
 #include "mapContainer.h"
@@ -14,28 +15,11 @@ int verifySemantic(AST *root)
   ROOT = root;
 
   setIdentifierTypes(root);
-  // setDataTypes(root);
-  // checkUsageConsistency(root);
-  // checkUndeclared();
+  setDataTypes(root);
+  checkUsageConsistency(root);
+  checkUndeclared();
 
   return semanticErrors;
-}
-
-void printAST(AST *node, int depth)
-{
-  if (!node)
-    return;
-
-  for (int i = 0; i < depth; ++i)
-    cerr << "  ";
-
-  cerr << "Node type: " << node->type << ", Line: " << node->line << endl;
-
-  for (AST *child : node->sons)
-  {
-    if (child)
-      printAST(child, depth + 1);
-  }
 }
 
 void setIdentifierTypes(AST *node)
@@ -97,8 +81,7 @@ void setIdentifierTypes(AST *node)
     {
       if (node->sons[1]->symbol->type != SYMBOL_IDENTIFIER)
       {
-        cerr << "Semantic error: function " << node->sons[1]->symbol->text
-             << " already declared at line " << node->line << endl;
+        cerr << "Semantic error: function " << node->sons[1]->symbol->text << " already declared at line " << node->line << endl;
         semanticErrors++;
       }
       else
@@ -107,6 +90,8 @@ void setIdentifierTypes(AST *node)
         node->sons[1]->symbol->dataType = (node->sons[0] && node->sons[0]->type == AST_KW_CHAR)
                                               ? DATATYPE_CHAR
                                               : DATATYPE_INT;
+
+        node->dataType = node->sons[1]->symbol->dataType;
       }
     }
     else
@@ -149,21 +134,6 @@ void setIdentifierTypes(AST *node)
   {
     if (child)
       setIdentifierTypes(child);
-  }
-}
-
-void checkUndeclared()
-{
-  for (const auto &entry : symbolTable)
-  {
-    const string &name = entry.first;
-    const Symbol &symbol = entry.second;
-
-    if (symbol.type == SYMBOL_IDENTIFIER)
-    {
-      cerr << "Semantic error : variable " << name << " not declared" << endl;
-      semanticErrors++;
-    }
   }
 }
 
@@ -242,10 +212,45 @@ void setDataTypes(AST *node)
     }
     break;
 
+  case AST_PARENS:
+    setDataTypes(node->sons[0]);
+    node->dataType = node->sons[0]->dataType;
+    break;
+
   case AST_VEC_DEC:
     setDataTypes(node->sons[0]);
     setDataTypes(node->sons[2]);
     validateVectorInitialization(node);
+    break;
+
+  case AST_FUNCTION_DEC:
+    if (node->sons[2])
+    {
+      setDataTypes(node->sons[2]);
+    }
+    setDataTypes(node->sons[0]);
+    setDataTypes(node->sons[3]);
+    break;
+
+  case AST_FUNC_CALL:
+    setDataTypes(node->sons[0]);
+    setDataTypes(node->sons[1]);
+    if (node->sons[0])
+    {
+      node->dataType = node->sons[0]->dataType;
+    }
+    break;
+
+  case AST_RETURN:
+    if (node->sons[0])
+    {
+      setDataTypes(node->sons[0]);
+      node->dataType = node->sons[0]->dataType;
+    }
+    else
+    {
+      node->dataType = -1;
+    }
     break;
 
   default:
@@ -369,9 +374,9 @@ void checkUsageConsistency(AST *node)
         semanticErrors++;
       }
 
-      if (node->sons[1] && node->sons[1]->symbol)
+      if (node->sons[1])
       {
-        int indexDataType = node->sons[1]->symbol->dataType;
+        int indexDataType = inferExpressionType(node->sons[1]);
         if (!isInteger(indexDataType))
         {
           cerr << "Semantic error: Index for vector " << node->sons[0]->symbol->text << " must be an integer at line " << node->line << endl;
@@ -393,6 +398,45 @@ void checkUsageConsistency(AST *node)
       {
         validateFunctionArguments(node);
       }
+    }
+    break;
+
+  case AST_IF:
+  case AST_IFELSE:
+    if (node->sons[0])
+    {
+      int conditionType = inferExpressionType(node->sons[0]);
+      if (conditionType != DATATYPE_BOOL)
+      {
+        cerr << "Semantic error: Condition in 'if' must be boolean at line " << node->line << endl;
+        semanticErrors++;
+      }
+    }
+    checkUsageConsistency(node->sons[1]);
+    if (node->type == AST_IFELSE && node->sons[2])
+    {
+      checkUsageConsistency(node->sons[2]);
+    }
+    break;
+
+  case AST_WHILE:
+    if (node->sons[0])
+    {
+      int conditionType = inferExpressionType(node->sons[0]);
+      if (conditionType != DATATYPE_BOOL)
+      {
+        cerr << "Semantic error: Condition in 'while' must be boolean at line " << node->line << endl;
+        semanticErrors++;
+      }
+    }
+    checkUsageConsistency(node->sons[1]);
+    break;
+
+  case AST_FUNCTION_DEC:
+    if (node->sons[3])
+    {
+      int expectedReturnType = node->dataType;
+      checkReturnStatements(node->sons[3], expectedReturnType);
     }
     break;
 
@@ -441,8 +485,7 @@ void validateVectorInitialization(AST *node)
   }
   catch (const exception &e)
   {
-    cerr << "Semantic error: Invalid vector size '" << node->sons[2]->symbol->text
-         << "' at line " << node->line << endl;
+    cerr << "Semantic error: Invalid vector size '" << node->sons[2]->symbol->text << "' at line " << node->line << endl;
     semanticErrors++;
     return;
   }
@@ -540,31 +583,46 @@ void validateFunctionArguments(AST *node)
   AST *declaredParams = functionDeclaration->sons[2];
   AST *passedArgs = node->sons[1];
 
-  cerr << "DEBUG: Declared parameters for function '" << functionSymbol->text << "':" << endl;
-  printAST(declaredParams, 1);
-
-  cerr << "DEBUG: Passed arguments for function '" << functionSymbol->text << "' at line " << node->line << ":" << endl;
-  printAST(passedArgs, 1);
-
   int declaredCount = countFunctionParameters(declaredParams);
   int passedCount = countFunctionParameters(passedArgs);
 
-  cerr << "DEBUG: Declared count: " << declaredCount << ", Passed count: " << passedCount << endl;
-
   if (declaredCount != passedCount)
   {
-    cerr << "Semantic error: Mismatch in number of arguments for function '" << functionSymbol->text
-         << "' at line " << node->line << ". Declared: " << declaredCount << ", Passed: " << passedCount << endl;
+    cerr << "Semantic error: Mismatch in number of arguments for function '" << functionSymbol->text << "' at line " << node->line << ". Declared: " << declaredCount << ", Passed: " << passedCount << endl;
     semanticErrors++;
     return;
   }
 
-  if (!validateParameterTypes(declaredParams, passedArgs))
+  AST *declared = declaredParams;
+  AST *passed = passedArgs;
+
+  while (declared && passed)
   {
-    cerr << "Semantic error: Type mismatch in arguments for function '" << functionSymbol->text
-         << "' at line " << node->line << endl;
-    semanticErrors++;
+    int declaredType = declared->sons[1] ? declared->sons[1]->symbol->dataType : -1;
+    int passedType = passed->sons[0] ? passed->sons[0]->dataType : -1;
+
+    if (declaredType == -1 || passedType == -1)
+    {
+      cerr << "Semantic error: Invalid type in function arguments at line " << node->line << endl;
+      semanticErrors++;
+      return;
+    }
+
+    if (!isTypeCompatible(declaredType, passedType))
+    {
+      cerr << "Semantic error: Type mismatch in arguments for function '" << functionSymbol->text << "' at line " << node->line << endl;
+      semanticErrors++;
+    }
+
+    declared = declared->sons[2];
+    passed = passed->sons[1];
   }
+}
+
+bool isTypeCompatible(int declaredType, int passedType)
+{
+  return (declaredType == passedType) ||
+         (isInteger(declaredType) && isInteger(passedType));
 }
 
 int countFunctionParameters(AST *node)
@@ -572,56 +630,81 @@ int countFunctionParameters(AST *node)
   if (!node)
     return 0;
 
-  cerr << "DEBUG: Counting parameters. Node type: " << node->type << ", Line: " << node->line << endl;
-
   if (node->type == AST_NONEMPTY_FUNC_CALL_PARAMS)
   {
-    int count = 1 + countFunctionParameters(node->sons[1]);
-    cerr << "DEBUG: Parameters counted so far: " << count << endl;
+    return 1 + countFunctionParameters(node->sons[1]);
+  }
+
+  if (node->type == AST_FUNC_CALL_PARAMS)
+  {
+    return (node->sons[0] ? 1 : 0) + countFunctionParameters(node->sons[1]);
+  }
+
+  if (node->type == AST_FUNCTION_DEC_PARAMS)
+  {
+    int count = (node->sons[0] && node->sons[1]) ? 1 : 0;
+    count += countFunctionParameters(node->sons[2]);
     return count;
   }
 
   if (node->type == AST_NONEMPTY_FUNCTION_DEC_PARAMS)
   {
-    int count = 1 + countFunctionParameters(node->sons[2]);
-    cerr << "DEBUG: Parameters counted so far: " << count << endl;
-    return count;
+    return 1 + countFunctionParameters(node->sons[2]);
   }
 
-  if (node->type == AST_FUNC_CALL_PARAMS || node->type == AST_FUNCTION_DEC_PARAMS)
-  {
-    int count = node->sons[0] ? 1 : 0;
-    cerr << "DEBUG: Single parameter node detected. Count: " << count << endl;
-    return count;
-  }
-
-  cerr << "DEBUG: No parameters detected in current node." << endl;
   return 0;
 }
 
-bool validateParameterTypes(AST *declared, AST *passed)
+void checkUndeclared()
 {
-  if (!declared || !passed)
-    return true;
-
-  if (declared->dataType == -1 || passed->dataType == -1)
+  for (const auto &entry : symbolTable)
   {
-    cerr << "DEBUG: Type not set for either declared or passed parameter." << endl;
-    return false;
+    const string &name = entry.first;
+    const Symbol &symbol = entry.second;
+
+    if (symbol.type == SYMBOL_IDENTIFIER)
+    {
+      cerr << "Semantic error : variable " << name << " not declared" << endl;
+      semanticErrors++;
+    }
+  }
+}
+
+void validateReturnType(AST *node, int expectedReturnType)
+{
+  if (!node || node->type != AST_RETURN)
+    return;
+
+  if (node->sons[0])
+  {
+    int returnType = inferExpressionType(node->sons[0]);
+
+    if (returnType != expectedReturnType)
+    {
+      cerr << "Semantic error: Return type mismatch at line " << node->line << ". Expected: " << expectedReturnType << ", Found: " << returnType << endl;
+      semanticErrors++;
+    }
+  }
+  else if (expectedReturnType != -1)
+  {
+    cerr << "Semantic error: Missing return value for function at line " << node->line << ". Expected type: " << expectedReturnType << endl;
+    semanticErrors++;
+  }
+}
+
+void checkReturnStatements(AST *node, int expectedReturnType)
+{
+  if (!node)
+    return;
+
+  if (node->type == AST_RETURN)
+  {
+    validateReturnType(node, expectedReturnType);
   }
 
-  if ((declared->type == AST_NONEMPTY_FUNCTION_DEC_PARAMS || declared->type == AST_FUNCTION_DEC_PARAMS) &&
-      (passed->type == AST_NONEMPTY_FUNC_CALL_PARAMS || passed->type == AST_FUNC_CALL_PARAMS))
+  for (AST *child : node->sons)
   {
-    bool result = validateParameterTypes(declared->sons[1], passed->sons[1]) &&
-                  (isInteger(declared->sons[0]->dataType) && isInteger(passed->sons[0]->dataType));
-    cerr << "DEBUG: Recursive parameter type comparison result: " << result << endl;
-    return result;
+    if (child)
+      checkReturnStatements(child, expectedReturnType);
   }
-
-  bool result = (isInteger(declared->dataType) && isInteger(passed->dataType)) ||
-                (declared->dataType == passed->dataType);
-
-  cerr << "DEBUG: Final parameter type comparison result: " << result << endl;
-  return result;
 }

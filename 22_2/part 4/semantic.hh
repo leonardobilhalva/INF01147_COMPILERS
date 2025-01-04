@@ -1,3 +1,4 @@
+// Leonardo Bilhalva - 315768 | Artur Turatti - 304740
 #ifndef SEMANTIC_HEADER
 #define SEMANTIC_HEADER
 
@@ -26,5 +27,6 @@ void validateFunctionArguments(AST *node);
 int countFunctionParameters(AST *node);
 AST *findFunctionDeclaration(Symbol *symbol, AST *node = nullptr);
 bool validateParameterTypes(AST *declared, AST *passed);
-
-void printAST(AST *node, int depth = 0);
+bool isTypeCompatible(int declaredType, int passedType);
+void validateReturnType(AST *node, int expectedReturnType);
+void checkReturnStatements(AST *node, int expectedReturnType);
