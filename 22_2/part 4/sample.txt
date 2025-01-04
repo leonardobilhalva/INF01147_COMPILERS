@@ -28,7 +28,7 @@ int main ()
 
   while (1<#10)
     {
-    1 = incn(1);
+    1 = incn(1,#1);
     7 = incn(7,7);
     }
 
