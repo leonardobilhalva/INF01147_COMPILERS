@@ -3,8 +3,8 @@
 #include <fstream>        // file management -> file management
 #include "mapContainer.h" // map container -> symbol table
 #include "y.tab.h"        // bison stuff
-#include "ast.hh"
-#include "semantic.hh" // semantic stuff
+#include "ast.hh"         // ast stuff
+#include "semantic.hh"    // semantic stuff
 
 using namespace std;
 
