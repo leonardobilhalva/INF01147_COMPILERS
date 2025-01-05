@@ -455,6 +455,7 @@ int isInteger(int datatype)
 {
   return (datatype == DATATYPE_INT || datatype == DATATYPE_CHAR);
 }
+
 void validateVectorInitialization(AST *node)
 {
   if (!node->sons[2] || !node->sons[2]->symbol)
@@ -466,8 +467,7 @@ void validateVectorInitialization(AST *node)
 
   if (node->sons[2]->symbol->type != SYMBOL_LIT_INT)
   {
-    cerr << "Semantic error: Vector size must be an integer literal, found '"
-         << node->sons[2]->symbol->text << "' at line " << node->line << endl;
+    cerr << "Semantic error: Vector size must be an integer literal, found '" << node->sons[2]->symbol->text << "' at line " << node->line << endl;
     semanticErrors++;
     return;
   }
@@ -482,15 +482,13 @@ void validateVectorInitialization(AST *node)
 
   if (declaredSize != actualSize)
   {
-    cerr << "Semantic error: Mismatch in vector initialization size at line " << node->line
-         << ". Declared: " << declaredSize << ", Actual: " << actualSize << endl;
+    cerr << "Semantic error: Mismatch in vector initialization size at line " << node->line << ". Declared: " << declaredSize << ", Actual: " << actualSize << endl;
     semanticErrors++;
   }
 
   if (!validateVectorTypes(node->sons[0]->dataType, node->sons[3]))
   {
-    cerr << "Semantic error: Incompatible types in vector initialization at line "
-         << node->line << endl;
+    cerr << "Semantic error: Incompatible types in vector initialization at line " << node->line << endl;
     semanticErrors++;
   }
 }
