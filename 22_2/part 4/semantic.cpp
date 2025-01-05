@@ -107,8 +107,7 @@ void setIdentifierTypes(AST *node)
     {
       if (node->sons[1]->symbol->type != SYMBOL_IDENTIFIER)
       {
-        cerr << "Semantic error: parameter " << node->sons[1]->symbol->text
-             << " already declared at line " << node->line << endl;
+        cerr << "Semantic error: parameter " << node->sons[1]->symbol->text << " already declared at line " << node->line << endl;
         semanticErrors++;
       }
       else
