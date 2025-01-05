@@ -41,7 +41,12 @@ semantic.o: semantic.cpp semantic.hh ast.hh
 clean:
 	rm -f $(OBJS) $(LEXER) y.tab.* $(TARGET) output.txt outnew.txt
 
-test:
+
+test: ## to test semantics
+	@echo "Running ./etapa4 with sample.txt -> output.txt to test semantics"
+	./etapa4 sample.txt output.txt
+
+test_e3: ## to test old etapa3 stuff
 	@echo "Running ./etapa4 with sample.txt -> output.txt"
 	./etapa4 sample.txt output.txt
 	@echo "Running ./etapa4 with output.txt -> outnew.txt"

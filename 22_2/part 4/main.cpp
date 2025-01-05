@@ -50,23 +50,23 @@ int main(int argc, char **argv)
   }
 
   root = getRoot();
-  // if (root)
-  // {
-  //   ofstream outputFile(argv[2]);
-  //   if (!outputFile.is_open())
-  //   {
-  //     cerr << "Error opening output file: " << argv[2] << endl;
-  //     fclose(yyin);
-  //     return 3;
-  //   }
+  if (root)
+  {
+    ofstream outputFile(argv[2]);
+    if (!outputFile.is_open())
+    {
+      cerr << "Error opening output file: " << argv[2] << endl;
+      fclose(yyin);
+      return 3;
+    }
 
-  //   astPrintCode(root, outputFile);
-  //   outputFile.close();
-  // }
-  // else
-  // {
-  //   cerr << "AST root is null. No code to print." << endl;
-  // }
+    astPrintCode(root, outputFile);
+    outputFile.close();
+  }
+  else
+  {
+    cerr << "AST root is null. No code to print." << endl;
+  }
 
   fprintf(stderr, "Checking Semantic...\n");
   checkSemantic();
