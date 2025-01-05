@@ -17,7 +17,7 @@ int verifySemantic(AST *root)
   setIdentifierTypes(root);
   setDataTypes(root);
   checkUsageConsistency(root);
-  checkUndeclared();
+  validateUndeclaredIdentifiers();
 
   return semanticErrors;
 }
@@ -263,7 +263,7 @@ void setDataTypes(AST *node)
   }
 }
 
-void checkTypeCompatibility(AST *node)
+void validateAssignmentTypes(AST *node)
 {
   if (!node || node->type != AST_ASSIGN)
     return;
@@ -369,7 +369,7 @@ void checkUsageConsistency(AST *node)
         semanticErrors++;
       }
     }
-    checkTypeCompatibility(node);
+    validateAssignmentTypes(node);
     break;
 
   case AST_ASSIGN_VEC:
@@ -657,7 +657,7 @@ int countFunctionParameters(AST *node)
   return 0;
 }
 
-void checkUndeclared()
+void validateUndeclaredIdentifiers()
 {
   for (const auto &entry : symbolTable)
   {

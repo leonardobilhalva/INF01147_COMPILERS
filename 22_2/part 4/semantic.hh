@@ -11,12 +11,12 @@ int verifySemantic(AST *root);
 
 void setIdentifierTypes(AST *node);
 void setDeclarationTypes(AST *node);
-void checkUndeclared();
+void validateUndeclaredIdentifiers();
 
 void setDataTypes(AST *node);
 void checkUsageConsistency(AST *node);
 int isInteger(int datatype);
-void checkTypeCompatibility(AST *node);
+void validateAssignmentTypes(AST *node);
 int inferExpressionType(AST *node);
 bool isArithmeticOperation(int nodeType);
 bool isRelationalOperation(int nodeType);
