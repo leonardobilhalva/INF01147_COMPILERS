@@ -455,7 +455,6 @@ int isInteger(int datatype)
 {
   return (datatype == DATATYPE_INT || datatype == DATATYPE_CHAR);
 }
-
 void validateVectorInitialization(AST *node)
 {
   if (!node->sons[2] || !node->sons[2]->symbol)
@@ -473,20 +472,9 @@ void validateVectorInitialization(AST *node)
     return;
   }
 
-  int declaredSize = 0;
-  string sizeText = node->sons[2]->symbol->text;
-
-  if (!sizeText.empty() && sizeText[0] == '#')
-    sizeText = sizeText.substr(1);
-
-  try
+  int declaredSize = parseVectorSize(node->sons[2]->symbol->text, node->line);
+  if (declaredSize == -1)
   {
-    declaredSize = stoi(sizeText);
-  }
-  catch (const exception &e)
-  {
-    cerr << "Semantic error: Invalid vector size '" << node->sons[2]->symbol->text << "' at line " << node->line << endl;
-    semanticErrors++;
     return;
   }
 
@@ -616,6 +604,21 @@ void validateFunctionArguments(AST *node)
 
     declared = declared->sons[2];
     passed = passed->sons[1];
+  }
+}
+
+int parseVectorSize(const string &sizeText, int line)
+{
+  try
+  {
+    string sanitizedText = (sizeText[0] == '#') ? sizeText.substr(1) : sizeText;
+    return stoi(sanitizedText);
+  }
+  catch (...)
+  {
+    cerr << "Semantic error: Invalid vector size '" << sizeText << "' at line " << line << endl;
+    semanticErrors++;
+    return -1;
   }
 }
 

@@ -24,6 +24,7 @@ int countVectorElements(AST *node);
 bool validateVectorTypes(int vectorType, AST *elements);
 
 void validateFunctionArguments(AST *node);
+int parseVectorSize(const string &sizeText, int line);
 int countFunctionParameters(AST *node);
 AST *findFunctionDeclaration(Symbol *symbol, AST *node = nullptr);
 bool validateParameterTypes(AST *declared, AST *passed);
