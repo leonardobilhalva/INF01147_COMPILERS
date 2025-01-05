@@ -18,6 +18,9 @@ void checkUsageConsistency(AST *node);
 int isInteger(int datatype);
 void checkTypeCompatibility(AST *node);
 int inferExpressionType(AST *node);
+bool isArithmeticOperation(int nodeType);
+bool isRelationalOperation(int nodeType);
+bool isLogicalOperation(int nodeType);
 
 void validateVectorInitialization(AST *node);
 int countVectorElements(AST *node);

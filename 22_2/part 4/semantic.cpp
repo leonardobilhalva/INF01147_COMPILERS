@@ -289,12 +289,8 @@ int inferExpressionType(AST *node)
   if (!node)
     return -1;
 
-  switch (node->type)
+  if (isArithmeticOperation(node->type))
   {
-  case AST_ADD:
-  case AST_SUB:
-  case AST_MUL:
-  case AST_DIV:
     if (node->sons[0] && node->sons[1])
     {
       int leftType = inferExpressionType(node->sons[0]);
@@ -302,22 +298,9 @@ int inferExpressionType(AST *node)
       if (areTypesCompatible(leftType, rightType))
         return DATATYPE_INT;
     }
-    break;
-
-  case AST_AND:
-  case AST_OR:
-    if (node->sons[0] && node->sons[1])
-    {
-      int leftType = inferExpressionType(node->sons[0]);
-      int rightType = inferExpressionType(node->sons[1]);
-      if (leftType == DATATYPE_BOOL && rightType == DATATYPE_BOOL)
-        return DATATYPE_BOOL;
-    }
-    break;
-
-  case AST_EQ:
-  case AST_GTR:
-  case AST_LSS:
+  }
+  else if (isRelationalOperation(node->type))
+  {
     if (node->sons[0] && node->sons[1])
     {
       int leftType = inferExpressionType(node->sons[0]);
@@ -325,25 +308,49 @@ int inferExpressionType(AST *node)
       if (isInteger(leftType) && isInteger(rightType))
         return DATATYPE_BOOL;
     }
-    break;
-
-  case AST_NEG:
+  }
+  else if (isLogicalOperation(node->type))
+  {
+    if (node->sons[0] && node->sons[1])
+    {
+      int leftType = inferExpressionType(node->sons[0]);
+      int rightType = inferExpressionType(node->sons[1]);
+      if (leftType == DATATYPE_BOOL && rightType == DATATYPE_BOOL)
+        return DATATYPE_BOOL;
+    }
+  }
+  else if (node->type == AST_NEG)
+  {
     if (node->sons[0])
     {
       int operandType = inferExpressionType(node->sons[0]);
       if (operandType == DATATYPE_BOOL)
         return DATATYPE_BOOL;
     }
-    break;
-
-  case AST_SYMBOL:
+  }
+  else if (node->type == AST_SYMBOL)
+  {
     return node->symbol ? node->symbol->dataType : -1;
-
-  default:
-    break;
   }
 
   return -1;
+}
+
+bool isArithmeticOperation(int nodeType)
+{
+  return nodeType == AST_ADD || nodeType == AST_SUB ||
+         nodeType == AST_MUL || nodeType == AST_DIV;
+}
+
+bool isRelationalOperation(int nodeType)
+{
+  return nodeType == AST_EQ || nodeType == AST_GTR ||
+         nodeType == AST_LSS;
+}
+
+bool isLogicalOperation(int nodeType)
+{
+  return nodeType == AST_AND || nodeType == AST_OR;
 }
 
 void checkUsageConsistency(AST *node)
