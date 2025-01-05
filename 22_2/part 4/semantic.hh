@@ -27,6 +27,6 @@ void validateFunctionArguments(AST *node);
 int countFunctionParameters(AST *node);
 AST *findFunctionDeclaration(Symbol *symbol, AST *node = nullptr);
 bool validateParameterTypes(AST *declared, AST *passed);
-bool isTypeCompatible(int declaredType, int passedType);
 void validateReturnType(AST *node, int expectedReturnType);
 void checkReturnStatements(AST *node, int expectedReturnType);
+bool areTypesCompatible(int type1, int type2);

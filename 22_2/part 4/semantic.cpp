@@ -157,7 +157,7 @@ void setDataTypes(AST *node)
   case AST_DIV:
     setDataTypes(node->sons[0]);
     setDataTypes(node->sons[1]);
-    if (isInteger(node->sons[0]->dataType) && isInteger(node->sons[1]->dataType))
+    if (areTypesCompatible(node->sons[0]->dataType, node->sons[1]->dataType))
     {
       node->dataType = DATATYPE_INT;
     }
@@ -275,7 +275,7 @@ void checkTypeCompatibility(AST *node)
 
     if (leftType != -1 && rightType != -1)
     {
-      if ((isInteger(leftType) && isInteger(rightType)) || leftType == rightType)
+      if (areTypesCompatible(leftType, rightType))
         return;
 
       cerr << "Semantic error: Type mismatch in assignment at line " << node->line << ". Left: " << leftType << ", Right: " << rightType << endl;
@@ -299,7 +299,7 @@ int inferExpressionType(AST *node)
     {
       int leftType = inferExpressionType(node->sons[0]);
       int rightType = inferExpressionType(node->sons[1]);
-      if (isInteger(leftType) && isInteger(rightType))
+      if (areTypesCompatible(leftType, rightType))
         return DATATYPE_INT;
     }
     break;
@@ -608,7 +608,7 @@ void validateFunctionArguments(AST *node)
       return;
     }
 
-    if (!isTypeCompatible(declaredType, passedType))
+    if (!areTypesCompatible(declaredType, passedType))
     {
       cerr << "Semantic error: Type mismatch in arguments for function '" << functionSymbol->text << "' at line " << node->line << endl;
       semanticErrors++;
@@ -617,12 +617,6 @@ void validateFunctionArguments(AST *node)
     declared = declared->sons[2];
     passed = passed->sons[1];
   }
-}
-
-bool isTypeCompatible(int declaredType, int passedType)
-{
-  return (declaredType == passedType) ||
-         (isInteger(declaredType) && isInteger(passedType));
 }
 
 int countFunctionParameters(AST *node)
@@ -707,4 +701,9 @@ void checkReturnStatements(AST *node, int expectedReturnType)
     if (child)
       checkReturnStatements(child, expectedReturnType);
   }
+}
+
+bool areTypesCompatible(int type1, int type2)
+{
+  return (type1 == type2) || (isInteger(type1) && isInteger(type2));
 }
