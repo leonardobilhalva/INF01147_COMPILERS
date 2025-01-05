@@ -263,96 +263,6 @@ void setDataTypes(AST *node)
   }
 }
 
-void validateAssignmentTypes(AST *node)
-{
-  if (!node || node->type != AST_ASSIGN)
-    return;
-
-  if (node->sons[0] && node->sons[1])
-  {
-    int leftType = node->sons[0]->symbol ? node->sons[0]->symbol->dataType : -1;
-    int rightType = inferExpressionType(node->sons[1]);
-
-    if (leftType != -1 && rightType != -1)
-    {
-      if (areTypesCompatible(leftType, rightType))
-        return;
-
-      cerr << "Semantic error: Type mismatch in assignment at line " << node->line << ". Left: " << leftType << ", Right: " << rightType << endl;
-      semanticErrors++;
-    }
-  }
-}
-
-int inferExpressionType(AST *node)
-{
-  if (!node)
-    return -1;
-
-  if (isArithmeticOperation(node->type))
-  {
-    if (node->sons[0] && node->sons[1])
-    {
-      int leftType = inferExpressionType(node->sons[0]);
-      int rightType = inferExpressionType(node->sons[1]);
-      if (areTypesCompatible(leftType, rightType))
-        return DATATYPE_INT;
-    }
-  }
-  else if (isRelationalOperation(node->type))
-  {
-    if (node->sons[0] && node->sons[1])
-    {
-      int leftType = inferExpressionType(node->sons[0]);
-      int rightType = inferExpressionType(node->sons[1]);
-      if (isInteger(leftType) && isInteger(rightType))
-        return DATATYPE_BOOL;
-    }
-  }
-  else if (isLogicalOperation(node->type))
-  {
-    if (node->sons[0] && node->sons[1])
-    {
-      int leftType = inferExpressionType(node->sons[0]);
-      int rightType = inferExpressionType(node->sons[1]);
-      if (leftType == DATATYPE_BOOL && rightType == DATATYPE_BOOL)
-        return DATATYPE_BOOL;
-    }
-  }
-  else if (node->type == AST_NEG)
-  {
-    if (node->sons[0])
-    {
-      int operandType = inferExpressionType(node->sons[0]);
-      if (operandType == DATATYPE_BOOL)
-        return DATATYPE_BOOL;
-    }
-  }
-  else if (node->type == AST_SYMBOL)
-  {
-    return node->symbol ? node->symbol->dataType : -1;
-  }
-
-  return -1;
-}
-
-bool isArithmeticOperation(int nodeType)
-{
-  return nodeType == AST_ADD || nodeType == AST_SUB ||
-         nodeType == AST_MUL || nodeType == AST_DIV;
-}
-
-bool isRelationalOperation(int nodeType)
-{
-  return nodeType == AST_EQ || nodeType == AST_GTR ||
-         nodeType == AST_LSS;
-}
-
-bool isLogicalOperation(int nodeType)
-{
-  return nodeType == AST_AND || nodeType == AST_OR;
-}
-
 void checkUsageConsistency(AST *node)
 {
   if (!node)
@@ -456,6 +366,113 @@ void checkUsageConsistency(AST *node)
     if (child)
       checkUsageConsistency(child);
   }
+}
+
+void validateUndeclaredIdentifiers()
+{
+  for (const auto &entry : symbolTable)
+  {
+    const string &name = entry.first;
+    const Symbol &symbol = entry.second;
+
+    if (symbol.type == SYMBOL_IDENTIFIER)
+    {
+      cerr << "Semantic error : variable " << name << " not declared" << endl;
+      semanticErrors++;
+    }
+  }
+}
+
+//
+
+void validateAssignmentTypes(AST *node)
+{
+  if (!node || node->type != AST_ASSIGN)
+    return;
+
+  if (node->sons[0] && node->sons[1])
+  {
+    int leftType = node->sons[0]->symbol ? node->sons[0]->symbol->dataType : -1;
+    int rightType = inferExpressionType(node->sons[1]);
+
+    if (leftType != -1 && rightType != -1)
+    {
+      if (areTypesCompatible(leftType, rightType))
+        return;
+
+      cerr << "Semantic error: Type mismatch in assignment at line " << node->line << ". Left: " << leftType << ", Right: " << rightType << endl;
+      semanticErrors++;
+    }
+  }
+}
+
+int inferExpressionType(AST *node)
+{
+  if (!node)
+    return -1;
+
+  if (isArithmeticOperation(node->type))
+  {
+    if (node->sons[0] && node->sons[1])
+    {
+      int leftType = inferExpressionType(node->sons[0]);
+      int rightType = inferExpressionType(node->sons[1]);
+      if (areTypesCompatible(leftType, rightType))
+        return DATATYPE_INT;
+    }
+  }
+  else if (isRelationalOperation(node->type))
+  {
+    if (node->sons[0] && node->sons[1])
+    {
+      int leftType = inferExpressionType(node->sons[0]);
+      int rightType = inferExpressionType(node->sons[1]);
+      if (isInteger(leftType) && isInteger(rightType))
+        return DATATYPE_BOOL;
+    }
+  }
+  else if (isLogicalOperation(node->type))
+  {
+    if (node->sons[0] && node->sons[1])
+    {
+      int leftType = inferExpressionType(node->sons[0]);
+      int rightType = inferExpressionType(node->sons[1]);
+      if (leftType == DATATYPE_BOOL && rightType == DATATYPE_BOOL)
+        return DATATYPE_BOOL;
+    }
+  }
+  else if (node->type == AST_NEG)
+  {
+    if (node->sons[0])
+    {
+      int operandType = inferExpressionType(node->sons[0]);
+      if (operandType == DATATYPE_BOOL)
+        return DATATYPE_BOOL;
+    }
+  }
+  else if (node->type == AST_SYMBOL)
+  {
+    return node->symbol ? node->symbol->dataType : -1;
+  }
+
+  return -1;
+}
+
+bool isArithmeticOperation(int nodeType)
+{
+  return nodeType == AST_ADD || nodeType == AST_SUB ||
+         nodeType == AST_MUL || nodeType == AST_DIV;
+}
+
+bool isRelationalOperation(int nodeType)
+{
+  return nodeType == AST_EQ || nodeType == AST_GTR ||
+         nodeType == AST_LSS;
+}
+
+bool isLogicalOperation(int nodeType)
+{
+  return nodeType == AST_AND || nodeType == AST_OR;
 }
 
 int isInteger(int datatype)
@@ -655,21 +672,6 @@ int countFunctionParameters(AST *node)
   }
 
   return 0;
-}
-
-void validateUndeclaredIdentifiers()
-{
-  for (const auto &entry : symbolTable)
-  {
-    const string &name = entry.first;
-    const Symbol &symbol = entry.second;
-
-    if (symbol.type == SYMBOL_IDENTIFIER)
-    {
-      cerr << "Semantic error : variable " << name << " not declared" << endl;
-      semanticErrors++;
-    }
-  }
 }
 
 void validateReturnType(AST *node, int expectedReturnType)
