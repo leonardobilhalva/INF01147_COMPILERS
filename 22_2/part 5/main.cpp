@@ -5,12 +5,14 @@
 #include "y.tab.h"        // bison stuff
 #include "ast.hh"         // ast stuff
 #include "semantic.hh"    // semantic stuff
+#include "tacs.hh"        // tacs stuff
 
 using namespace std;
 
-AST *root = nullptr;   // ast stuff
-extern FILE *yyin;     // lexer stuff
-extern AST *getRoot(); // ast stuff
+AST *root = nullptr;                 // ast stuff
+extern FILE *yyin;                   // lexer stuff
+extern AST *getRoot();               // ast stuff
+extern TAC *generateCode(AST *node); // tacstuff
 extern int lineNumber;
 extern int running;
 
@@ -71,6 +73,10 @@ int main(int argc, char **argv)
   fprintf(stderr, "Checking Semantic...\n");
   checkSemantic();
   fprintf(stderr, "No Semantic Errors.\n");
+
+  cerr << "TACs:" << endl;
+  TAC *tacList = generateCode(root);
+  tacPrintBackwards(tacList);
 
   fclose(yyin);
 

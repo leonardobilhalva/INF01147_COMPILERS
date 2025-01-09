@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "mapContainer.h"
 #include "ast.hh"
+#include "tacs.hh"
 #include "semantic.hh"
 
 extern AST* root;
@@ -69,7 +70,13 @@ extern int semanticErrors;
 
 %%
 
-program: listGlobalDec { $$ = new AST(AST_PROGRAM, { $1 }, nullptr, getLineNumber()); root = $$; semanticErrors = verifySemantic($1); }
+program: listGlobalDec { $$ = new AST(AST_PROGRAM, { $1 }, nullptr, getLineNumber());
+  root = $$;
+  semanticErrors = verifySemantic($1);
+
+  /* TAC* newTac = generateCode($1);
+   tacPrintBackwards(newTac);*/
+}
 ;
 
 listGlobalDec: varDec ';' listGlobalDec { $$ = new AST(AST_LIST_GLOBAL_VAR_DEC, { $1, $3 }, nullptr, getLineNumber()); }

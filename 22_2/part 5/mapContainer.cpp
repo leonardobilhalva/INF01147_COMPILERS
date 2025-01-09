@@ -32,9 +32,14 @@ Symbol *insertSymbol(const string &text, int type)
   case SYMBOL_IDENTIFIER:
     symbol->dataType = -1;
     break;
+  case SYMBOL_VAR:
+    symbol->dataType = -1;
+    break;
+  case SYMBOL_LIT_STRING:
+    symbol->dataType = -1;
+    break;
   default:
-    if (type != SYMBOL_LIT_STRING)
-      cerr << "Warning: Unknown symbol type for text '" << text << "'." << endl;
+    cerr << "Warning: Unknown symbol type for text '" << text << "'." << endl;
     symbol->dataType = -1;
     break;
   }
@@ -48,4 +53,18 @@ void printSymbolTable()
   {
     cout << "Symbol: " << entry.first << ", Type: " << entry.second.type << endl;
   }
+}
+
+Symbol *makeTemp()
+{
+  static int serial = 0;
+  string tempName = "temp_" + to_string(serial++);
+  return insertSymbol(tempName, SYMBOL_VAR);
+}
+
+Symbol *makeLabel()
+{
+  static int serial = 0;
+  string labelName = "label_" + to_string(serial++);
+  return insertSymbol(labelName, SYMBOL_LABEL);
 }

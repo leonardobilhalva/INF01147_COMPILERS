@@ -16,6 +16,7 @@
 #define SYMBOL_VECTOR 11
 #define SYMBOL_FUNC 12
 #define SYMBOL_PARAM 13
+#define SYMBOL_LABEL 14
 
 #define DATATYPE_CHAR 20
 #define DATATYPE_INT 21
@@ -33,5 +34,7 @@ extern map<string, Symbol> symbolTable;
 
 Symbol *insertSymbol(const string &text, int type);
 void printSymbolTable();
+Symbol *makeTemp();
+Symbol *makeLabel();
 
 #endif // MAPCONTAINER_H
