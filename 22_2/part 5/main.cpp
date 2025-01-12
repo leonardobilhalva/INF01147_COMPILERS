@@ -74,6 +74,8 @@ int main(int argc, char **argv)
   checkSemantic();
   fprintf(stderr, "No Semantic Errors.\n");
 
+  astPrint(root, 0);
+
   cerr << "TACs:" << endl;
   TAC *tacList = generateCode(root);
   tacPrintBackwards(tacList);
