@@ -8,7 +8,20 @@ enum TACType
 {
   TAC_SYMBOL = 1,
   TAC_ADD,
-  TAC_SUB
+  TAC_SUB,
+  TAC_MUL,
+  TAC_DIV,
+  TAC_MOVE,
+  TAC_STORE,
+  TAC_PRINT,
+  TAC_READ,
+  TAC_RET,
+  TAC_IFZ,
+  TAC_LABEL,
+  TAC_JUMP,
+  TAC_BEGINFUN,
+  TAC_ENDFUN,
+  TAC_CALL
 };
 
 #include "ast.hh"
@@ -29,5 +42,6 @@ TAC *generateCode(AST *node);
 void tacPrint(TAC *tac);
 void tacPrintAll(TAC *tac);
 void tacPrintBackwards(TAC *tac);
+TAC *createBinaryOperation(int tacType, Symbol *result, TAC *leftCode, TAC *rightCode);
 
 #endif
