@@ -38,6 +38,9 @@ Symbol *insertSymbol(const string &text, int type)
   case SYMBOL_LIT_STRING:
     symbol->dataType = -1;
     break;
+  case SYMBOL_LABEL:
+    symbol->dataType = -1;
+    break;
   default:
     cerr << "Warning: Unknown symbol type for text '" << text << "'." << endl;
     symbol->dataType = -1;
